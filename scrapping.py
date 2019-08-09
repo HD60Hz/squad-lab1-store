@@ -15,5 +15,7 @@ soup = BeautifulSoup(content, features="lxml")
 
 body = soup.find_all("div", {"class": "Category-item"})
 
-print(body)
+
+if __name__ == '__main__':
+    print(body)
 
