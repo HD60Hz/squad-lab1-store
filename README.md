@@ -1,180 +1,263 @@
-LAB1 SQUAD TRAINING - PYTHON
+LAB3 SQUAD TRAINING - PYTHON
 ---
 
-* What is Python ?  
-    - Programming language created by Guido van Rossum in 1991
-    - Interpreted
-    - High level
-    - General-purpose
-    - Multi programming paradigms
-    - Extensible (generaly with C extensions)
-    - Garbage-collected
+We will create an app store named Storify
+* Specifications
+    - List product
+    - add product
 
-* Why use Python ?  
-    - Simple to read and **FAST** to write (Faster development cycles)
-    - Open source implementations and large community
-    - Rich standard library and even richer third-party modules
-    - Portability
-    - Fast enough for a lot of use cases (Alternative for use cases where speed is important for later)
-
-### Let's stop the theory and start practicing ...
-
-### 1. PYTHON
-First we need to have Python in our environment.
-To check if and what version is already installed run command:
-```shell
-python --version
-```
-Result: 
-> Python 3.7.3
-
-*If Python is not installed, follow this [Tutorial](https://realpython.com/installing-python/)*...
-*For this lab we are using Python version > 3.6*
-
-### 2. PIP
-To manage your python package, you need a package manager... 
-The most popular one is PIP   
-*FUNNY: pip is a recursive acronym that stands for "Pip Installs Packages"*
-
-Starting from Python version 3.4...
-PIP is included by default in Python installers
-
-**SO**... 
-to verify that PIP is installed, run command:
-```shell
-pip --version
-```
-Result: 
-> pip 19.1.1 from /usr/local/lib/python3.7/site-packages/pip (python 3.7)
-
-PIP can install packages from:  
-- VCS project urls
-- Local project directories
-- Local or remote source archives
-- Remote repositories called indexes... most known one is PyPI (Python Package Index)
-
-When a package is installed with PIP using the command (example package - cowsay):
-```shell
-pip install cowsay
-```
-Result:
-> Collecting cowsay   
-> Using cached https://files.pythonhosted.org/packages/d4/68/af23fbf90493044fc2ea83cd62923b9952c2d38eeeab83e0c016706bfbc8/cowsay-2.0.3-py2.py3-none-any.whl   
-> Installing collected packages: cowsay   
-> Successfully installed cowsay-2.0.3
-
-... the manager will put the package files in python global package directories (e.g. site-packages)
->  /usr/local/lib/python3.7/site-packages/
-
-The problem with the strategy used by python to resolve packages and modules is that all python projects
-will share the same packages versions
-
-*SOLUTION: VIRTUAL ENVIRONMENTS*
-
-### 3. VENV
-
-VENV is a python package that allow us to encapsulate each project in its own bubble
-with its proper python and pip binaries... and thus its own site packages directories
-
-Starting from Python version 3.3...
-VENV is included by default in Python installers
-
-To create a new virtual env run command:
-```shell
-python -m venv env
-```
-Result: \<current directory structure\>
-<pre>
-env
-├── bin
-│   ├── activate
-│   ├── activate.csh
-│   ├── activate.fish
-│   ├── easy_install
-│   ├── easy_install-3.7
-│   ├── pip
-│   ├── pip3
-│   ├── pip3.7
-│   ├── python -> python3.7
-│   ├── python3 -> python3.7
-│   └── python3.7 -> /Library/Frameworks/Python.framework/Versions/3.7/bin/python3.7
-├── include
-├── lib
-│   └── python3.7
-│       └── site-packages
-└── pyvenv.cfg
-</pre>
-
-Your virtual environment is created... **BUT** not activated   
-To activate your venv run command:
-```shell
-source env/bin/activate
-```
-Result:
-> (env) Project $
-
-The "(env)" indicate that you are in the python virtual environment   
-Now all installed packages will be local to the project
-
-To desactivate your venv run command (from venv):
-```shell
-deactivate
-```
-Result:
-> Project $
-
-### 4. HELLO WORLD
-
-Now that we installed our environment and of course activated the virtual one... Shall we create a Hello Word program ?
-
-Start by creating a ```main.py``` in your project directory (root) with content:
+## Storify
+### Create dictionary and tuple
+We will use a list of tuple to get default product and a dictionary to save all products
 ```python
-print("HELLO WORLD")
+store =  {}
+product = [
+    ("keyboard", 10.0, "10"),
+    ("mouse", 10.0, "3"),
+    ("desktop", 450.0, "5")
+]
 ```
-Then run command:
-```shell
-python main.py
-```
-Result:
-> HELLO WORLD
-
-Do you remember the package we installed as an example: cowsay   
-Let's try using it to say "Hello World"
-
-Change your ```main.py``` content to:
+You can print the product variable to see the result
 ```python
-import cowsay
-
-cowsay.tux("Hello World")
+print(product)
+```
+Run store.py:
+```shell
+python store.py
 ```
 Result:
-> Traceback (most recent call last):  
-> File "\<stdin\>", line 1, in \<module\>  
-> ModuleNotFoundError: No module named 'cowsay'
+> \[('keyboard', 10.0, '10'), ('mouse', 10.0, '3'), ('desktop', 450.0, '5')\]
 
-Ooops ... as said earlier the package was installed in 
-the global python package directory before we created and activated our venv... 
-This means that we need to reinstall it again in our venv python package directory   
-
-*You should know how to do it yourself by now* 
-
-Let's re-run the command again   
-
+To save all product in our dictionary, we'll use a for loop with range Because we know the number of product 
+```python
+for i in range(3):
+    store[i] = product[i]
+```
+You can print the store variable to see the result
+```python
+print(store)
+```
+Run store.py:
+```shell
+python store.py
+```
 Result:
+> {0: ('keyboard', 10.0, '10'), 1: ('mouse', 10.0, '3'), 2: ('desktop', 450.0, '5')}
+### Create function list_product and add_product
+We will create a function list product to list all product in a table
+```python
+def list_product():
+    """List all product from the store"""
+    print("List of product")
+    print("#", "name", "price", "quantity", sep="\t|\t", end="\n")
+    for index, product in store.items():
+        print(index, product[0], product[1], product[2], sep="\t|\t", end="\n")
 ```
-  ___________
-< Hello World >
-  ===========
-                \
-                 \
-                  \            
-                   .--.
-                  |o_o |
-                  |:_/ |
-                 //   \ \
-                (|     | )
-               /'\_   _/`\
-               \___)=(___/
-              
-              
+We use the second print to display the header of the table  
+* The **sep** parameter is the separator between the arguments of string (default is space " ")
+    - We use "\t|\t" which is **tabulation** + | + **tabulation**
+* The **end** parameter is end of the print (default is **\n** new line)
+
+We use the for loop to iterate through the store dictionary  
+* **store.items()** return a list containing the tuple with the **key** and the **value**
+
+And, we launch the print to display each product of the store dictionary
+* **index** is the key 
+* **product** is the value (tuple) => product\[0] is the name, product\[1] is the price and product\[2] is the quantity
+
+We can call our function
+```python
+list_product()
 ```
+Run store.py:
+```shell
+python store.py
+```
+Result:
+> List of product  
+> \#      |       name    |       price   |       quantity  
+> 0       |       keyboard        |       10.0    |       10  
+> 1       |       mouse   |       10.0    |       3  
+> 2       |       desktop |       450.0   |       5
+
+We will create a function add product to add a new product to the store
+```python
+def add_product():
+    """Add product to the store"""
+    print("Add a new product")
+    name = input("> name: ")
+    price = input("> price: ")
+    quantity = input("> quantity: ")
+    product = (name, price, quantity)
+    index = len(store.keys())
+    store[index] = product
+    list_product()
+```
+**name**, **price** and **quantity** are **input**
+* **input** allows user to enter strings using keyboard
+
+So, we invite user to enter a name, a price and a quantity for new product  
+We create a tuple for the new product  
+
+```python
+index = len(store.keys())
+```
+store.keys() return a list of all keys, in our case, it's \[0, 1, 2]  
+len(store.keys) return the total numbers of items, it's 3  
+So, we can use index to save a new product
+```python
+store[index] = product
+```
+We call list_product() to display our new store with the new product
+
+We can call our function
+```python
+add_product()
+```
+Run store.py:
+```shell
+python store.py
+```
+Result:
+> Add a new product  
+> \> name: monitor  
+> \> price: 600  
+> \> quantity: 5  
+> List of product  
+> \#       |       name    |       price   |       quantity  
+> 0       |       keyboard        |       10.0    |       10  
+> 1       |       mouse   |       10.0    |       3  
+> 2       |       desktop |       450.0   |       5  
+> 3       |       monitor |       600     |       5  
+
+AS you can see we have a new product as index with the entered value
+> 3       |       monitor |       600     |       5
+
+### Implement a basic REPL (Read–eval–print loop)
+
+We will add a While loop to interact with the user
+```python
+while True:
+    """We use a while loop to interact with the user"""
+    print("What do you want to do?", "\t1- Add product", "\t2- List product", "\t0- Exit", sep="\n", end="\n")
+    choice = input("Your choice>")
+    if choice == "0":
+        break
+    if choice == "1":
+        add_product()
+    if choice == "2":
+        list_product()
+
+print("Bye")
+```
+* First, we use a print to indicate the user the different choice available
+* Next, we save the choice of the user in choice variable, using input
+* Depending of the choice of the user, we run  different actions:
+    - "O" => **break** we interrupt the loop to quit 
+    - "1" => We run **add_product()** to add a new product
+    - "2" => We run **list_product()** to list all the product
+* We add the last print out of the loop when we choose "0"
+
+Let's try:
+Run store.py:
+```shell
+python store.py
+```
+Result:
+> What do you want to do?  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1- Add product  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2- List product  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0- Exit  
+> Your choice>1
+> Add a new product  
+> \>name: screen  
+> \>price: 600  
+> \>quantity: 3  
+> List of product  
+> \#       |       name    |       price   |       quantity  
+> 0       |       keyboard        |       10.0    |       10  
+> 1       |       mouse   |       10.0    |       3  
+> 2       |       desktop |       450.0   |       5  
+> 3       |       screen  |       600     |       3  
+> What do you want to do?  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1- Add product  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2- List product  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0- Exit  
+> Your choice>0  
+> Bye
+
+As you can see, we added a new product, we have a display the list of product and we return to the choice **What do you want to do?**  
+We choose "0" to quit and we have the message **Bye**
+
+#### Update function with loop
+We will now update our functions add_product to add several product at once
+```python
+def add_product():
+    """Add product to the store"""
+    while True:
+        print("What do you want to do?", "\t1- Add new product", "\t0- Exit", sep="\n", end="\n")
+        choice = input("Your choice>")
+        if choice == "0":
+            list_product()
+            break
+        if choice == "1":
+            print("Add a new product")
+            name = input("> name: ")
+            price = input("> price: ")
+            quantity = input("> quantity: ")
+            product = (name, price, quantity)
+            index = len(store.keys())
+            store[index] = product
+```
+* First, we use a print to indicate the user the different choice available
+* Next, we save the choice of the user in choice variable, using input
+* Depending of the choice of the user, we run  different actions:
+    - "O" => **break** we interrupt the loop to quit, but before quit, we display the list of product
+    - "1" => We add the product with name, price and quantity
+
+When the loop is broke, we return to the main loop of the script
+
+Run store.py:
+```shell
+python store.py
+```
+Result:
+> What do you want to do?  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1- Add product  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2- List product  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0- Exit  
+> Your choice>1  
+> What do you want to do?  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1- Add new product  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0- Exit  
+> Your choice>1
+> Add a new product  
+> \>name: screen  
+> \>price: 600  
+> \>quantity: 3  
+> What do you want to do?  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1- Add new product  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0- Exit  
+> Your choice>1  
+> \>name: desktop  
+> \>price: 1000
+> \>quantity: 1  
+> What do you want to do?  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1- Add new product  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0- Exit  
+> Your choice>0  
+> List of product  
+> \#       |       name    |       price   |       quantity  
+> 0       |       keyboard        |       10.0    |       10  
+> 1       |       mouse   |       10.0    |       3  
+> 2       |       desktop |       450.0   |       5  
+> 3       |       screen  |       300     |       2  
+> 4       |       desktop |       1000    |       1  
+> What do you want to do?  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1- Add product  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2- List product  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0- Exit  
+> Your choice>0  
+> Bye
+
+As you can see, when you choose add product from the main loop, We have a second loop which ask Add a new product or exit. When you add a new product, we have the same loop which ask again to Add a new product or exit
