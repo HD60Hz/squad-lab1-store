@@ -1,56 +1,132 @@
-# We Create store as dictionary
-# We will use store to save all product tuple
-store = {}
+def create_store():
+    print("==================================")
+    print("==================================")
+    print("        Welcome to Storify        ")
+    print("==================================")
+    print("==================================")
+    name = input("Enter a name for the store>")
+    inventory = [("screen", 600.0, 3),
+                 ("mouse", 40.0, 10)]
+    products = []
+    items_count = 0
+    for product in inventory:
+        items_count += product[2]
+        products.append(product)
 
-# We create product as list of tuple, it contains the default product
-# each tuple will create with the form (name_of_product, price_of_product, quantity)
-product = [
-    ("keyboard", 10.0, "10"),
-    ("mouse", 10.0, "3"),
-    ("desktop", 450.0, "5")
+    return {
+        "name": name,
+        "inventory": products,
+        "items_count": items_count
+    }
+
+
+def list_inventory(store):
+    while True:
+        print(f"######### List inventory of {store['name']} #########")
+        inventory = store["inventory"]
+        print("#", f"name           ", "price", "quantity", sep="\t\t\t")
+        for index, product in enumerate(inventory):
+            max_len = 9
+            name_len = len(product[0])
+            if max_len > name_len:
+                name = product[0] + (max_len-name_len) * " "
+            else:
+                name = product[0][:max_len]
+            print(index, name, product[1], product[2], sep="\t\t\t")
+        print("Total products:", store["items_count"])
+
+        choice = input("Return to the main menu [y/n]>")
+        if choice in ["y", "Y"]:
+            break
+
+
+def add_product(store):
+    print("######### Add product to inventory #########")
+    while True:
+        print("Total products:", store["items_count"])
+        print("Do you want to add product ? [y/n]")
+        choice = input("your choice>")
+        if choice in ["y", "Y"]:
+            # name = input("name:")
+            # price = float(input("price:"))
+            # quantity = int(input("quantity:"))
+            name, price, quantity = fill_product()
+
+            for index, product in enumerate(store["inventory"]):
+                if name.lower() == product[0].lower():
+                    edited_product = (name, price, quantity + product[2])
+                    store["items_count"] += quantity
+                    store["inventory"][index] = edited_product
+                    break
+            else:
+                store["inventory"].append((name, price, quantity))
+                store["items_count"] += quantity
+
+        else:
+            break
+
+
+def fill_product():
+    name = input("name:")
+
+    while True:
+        try:
+            price = float(input("price:"))
+            break
+        except ValueError:
+            print("You must enter a number")
+
+    while True:
+        try:
+            quantity = int(input("quantity:"))
+            if quantity <= 0:
+                print("The quantity must be > 0")
+            else:
+                break
+        except ValueError:
+            print("You must enter an integer")
+
+    return name, price, quantity
+
+
+list_command = [
+    {"id": 1, "name": "list inventory", "handler": list_inventory},
+    {"id": 2, "name": "add product to inventory", "handler": add_product},
+    {"id": 0, "name": "exit", "handler": False}
 ]
 
-#
-for i in range(3):
-    store[i] = product[i]
+
+def get_command(choice):
+    selected_command = None
+    if choice in [0, 1, 2]:
+        selected_command = next((item for item in list_command if item["id"] == choice), None)
+
+    return selected_command
 
 
-# We use a loop to add product
-def add_product():
-    """Add product to the store"""
-    while True:
-        print("What do you want to do?", "\t1- Add new product", "\t0- Exit", sep="\n", end="\n")
-        choice = input("Your choice>")
-        if choice == "0":
-            list_product()
-            break
-        if choice == "1":
-            print("Add a new product")
-            name = input("> name: ")
-            price = input("> price: ")
-            quantity = input("> quantity: ")
-            product = (name, price, quantity)
-            index = len(store.keys())
-            store[index] = product
+def start_store_repl(store):
+    start_store = True
+    while start_store:
+        print("\tcommand list")
+        for command in list_command:
+            print("\t", command["id"], " - ", command["name"], sep=" ")
+
+        try:
+            choice = int(input("your choice>"))
+
+            command = get_command(choice)
+            if command["id"] != 0:
+                command["handler"](store)
+            elif command["id"] == 0:
+                start_store = False
+            else:
+                print("You must choose between [1, 2]")
+
+        except ValueError:
+            print("You must choose an integer")
 
 
-def list_product():
-    """List all product from the store"""
-    print("List of product")
-    print("#", "name", "price", "quantity", sep="\t|\t", end="\n")
-    for index, product in store.items():
-        print(index, product[0], product[1], product[2], sep="\t|\t", end="\n")
+if __name__ == "__main__":
+    store = create_store()
+    start_store_repl(store)
 
-
-while True:
-    """We use a while loop to interact with the user"""
-    print("What do you want to do?", "\t1- Add product", "\t2- List product", "\t0- Exit", sep="\n", end="\n")
-    choice = input("Your choice>")
-    if choice == "0":
-        break
-    if choice == "1":
-        add_product()
-    if choice == "2":
-        list_product()
-
-print("Bye")
