@@ -103,6 +103,15 @@ def start_store_repl(store):
 ```
 
 **Let's modify our code**
+
+### 3- Handlers
+
+* We modify function **create_store()** to get name from input 
+* We create function **list_inventory()** to list the inventory of the store
+* We create function **add_product()** to add product to the store
+* We create function **fill_product()** to get product info from input
+* We create function **get_command()** to get the selected command from input
+* We create function **start_store_repl()** to create the loop on the store
 ```python
 def create_store():
     print("==================================")
@@ -153,9 +162,6 @@ def add_product(store):
         print("Do you want to add product ? [y/n]")
         choice = input("your choice>")
         if choice in ["y", "Y"]:
-            # name = input("name:")
-            # price = float(input("price:"))
-            # quantity = int(input("quantity:"))
             name, price, quantity = fill_product()
 
             for index, product in enumerate(store["inventory"]):
