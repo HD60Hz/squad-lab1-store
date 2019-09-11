@@ -2,7 +2,7 @@ LAB1 SQUAD TRAINING - PYTHON
 ---
 ### Fundamentals
 
-Before we start working on storify, our store management program, we need to review the basics of Python so that everyone has the minimum required to get started.
+Before we start working on storify, our store management application, we need to review the basics of Python so that everyone has the minimum required to get started.
 The way we are going to do that is by working with a [Jupyter Notebook](https://jupyter4edu.github.io/jupyter-edu-book/index.html).
 
 #### Jupyter Notebook
