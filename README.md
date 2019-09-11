@@ -1,180 +1,64 @@
 LAB1 SQUAD TRAINING - PYTHON
 ---
+### Fundamentals
 
-* What is Python ?  
-    - Programming language created by Guido van Rossum in 1991
-    - Interpreted
-    - High level
-    - General-purpose
-    - Multi programming paradigms
-    - Extensible (generaly with C extensions)
-    - Garbage-collected
+Before we start working on storify, our store management program, we need to review the basics of Python so that everyone has the minimum required to get started.
+The way we are going to do that is by working with a [Jupyter Notebook](https://jupyter4edu.github.io/jupyter-edu-book/index.html).
 
-* Why use Python ?  
-    - Simple to read and **FAST** to write (Faster development cycles)
-    - Open source implementations and large community
-    - Rich standard library and even richer third-party modules
-    - Portability
-    - Fast enough for a lot of use cases (Alternative for use cases where speed is important for later)
+#### Jupyter Notebook
 
-### Let's stop the theory and start practicing ...
+The Jupyter Notebook is a web application that allows you to create and share interactive documents that contain live code, equations, visualizations and explanatory text (markdown, latex...). Jupyter Notebook supports over 100 programming languages with its [kernels](https://github.com/jupyter/jupyter/wiki/Jupyter-kernels). Jupyter comes with IPython kernel as default.
 
-### 1. PYTHON
-First we need to have Python in our environment.
-To check if and what version is already installed run command:
+Let's pick up from where we left it last chapter, and install Jupyter. The uses of Jupyter are generally related to data science and scientific computing such as : Data cleaning and transformation, numerical simulation, statistical modeling, machine learning... So the recommanded way of using it is throught *Anaconda distribution* because it provides all the necessary packages out of the box. However, we are going to install jupyter the pythonic way by running the command from out virtual environnent :
 ```shell
-python --version
+pip install jupyter
 ```
-Result: 
-> Python 3.7.3
-
-*If Python is not installed, follow this [Tutorial](https://realpython.com/installing-python/)*...
-*For this lab we are using Python version > 3.6*
-
-### 2. PIP
-To manage your python package, you need a package manager... 
-The most popular one is PIP   
-*FUNNY: pip is a recursive acronym that stands for "Pip Installs Packages"*
-
-Starting from Python version 3.4...
-PIP is included by default in Python installers
-
-**SO**... 
-to verify that PIP is installed, run command:
-```shell
-pip --version
-```
-Result: 
-> pip 19.1.1 from /usr/local/lib/python3.7/site-packages/pip (python 3.7)
-
-PIP can install packages from:  
-- VCS project urls
-- Local project directories
-- Local or remote source archives
-- Remote repositories called indexes... most known one is PyPI (Python Package Index)
-
-When a package is installed with PIP using the command (example package - cowsay):
-```shell
-pip install cowsay
-```
-Result:
-> Collecting cowsay   
-> Using cached https://files.pythonhosted.org/packages/d4/68/af23fbf90493044fc2ea83cd62923b9952c2d38eeeab83e0c016706bfbc8/cowsay-2.0.3-py2.py3-none-any.whl   
-> Installing collected packages: cowsay   
-> Successfully installed cowsay-2.0.3
-
-... the manager will put the package files in python global package directories (e.g. site-packages)
->  /usr/local/lib/python3.7/site-packages/
-
-The problem with the strategy used by python to resolve packages and modules is that all python projects
-will share the same packages versions
-
-*SOLUTION: VIRTUAL ENVIRONMENTS*
-
-### 3. VENV
-
-VENV is a python package that allow us to encapsulate each project in its own bubble
-with its proper python and pip binaries... and thus its own site packages directories
-
-Starting from Python version 3.3...
-VENV is included by default in Python installers
-
-To create a new virtual env run command:
-```shell
-python -m venv env
-```
-Result: \<current directory structure\>
+Result (by listing files in env/bin) :
 <pre>
-env
-├── bin
-│   ├── activate
-│   ├── activate.csh
-│   ├── activate.fish
-│   ├── easy_install
-│   ├── easy_install-3.7
-│   ├── pip
-│   ├── pip3
-│   ├── pip3.7
-│   ├── python -> python3.7
-│   ├── python3 -> python3.7
-│   └── python3.7 -> /Library/Frameworks/Python.framework/Versions/3.7/bin/python3.7
-├── include
-├── lib
-│   └── python3.7
-│       └── site-packages
-└── pyvenv.cfg
+.
+├── ...
+├── iptest
+├── iptest3
+├── ipython
+├── ipython3
+├── jsonschema
+├── jupyter
+├── jupyter-bundlerextension
+├── jupyter-console
+├── jupyter-kernel
+├── jupyter-kernelspec
+├── jupyter-migrate
+├── jupyter-nbconvert
+├── jupyter-nbextension
+├── jupyter-notebook
+├── jupyter-qtconsole
+├── jupyter-run
+├── jupyter-serverextension
+├── jupyter-troubleshoot
+├── jupyter-trust
+├── ...
 </pre>
 
-Your virtual environment is created... **BUT** not activated   
-To activate your venv run command:
+What we left to do is to run Jupyter Notebook with :
 ```shell
-source env/bin/activate
+jupyter notebook
 ```
 Result:
-> (env) Project $
+<pre>
+[I 16:17:01.705 NotebookApp] Serving notebooks from local directory: /home/user/Playground/squad-lab1-store
+[I 16:17:01.705 NotebookApp] The Jupyter Notebook is running at:
+[I 16:17:01.705 NotebookApp] http://localhost:8888/?token=a0bbfe62e863264c032f723e211d35c3131f58638be00a59
+[I 16:17:01.706 NotebookApp]  or http://127.0.0.1:8888/?token=a0bbfe62e863264c032f723e211d35c3131f58638be00a59
+[I 16:17:01.706 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 16:17:01.730 NotebookApp]
 
-The "(env)" indicate that you are in the python virtual environment   
-Now all installed packages will be local to the project
+    To access the notebook, open this file in a browser:
+        file:///home/user/.local/share/jupyter/runtime/nbserver-21829-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8888/?token=a0bbfe62e863264c032f723e211d35c3131f58638be00a59
+     or http://127.0.0.1:8888/?token=a0bbfe62e863264c032f723e211d35c3131f58638be00a59
+</pre>
 
-To desactivate your venv run command (from venv):
-```shell
-deactivate
-```
-Result:
-> Project $
+As you can see, the output presents us with URLs to open the notebook web application.
 
-### 4. HELLO WORLD
-
-Now that we installed our environment and of course activated the virtual one... Shall we create a Hello Word program ?
-
-Start by creating a ```main.py``` in your project directory (root) with content:
-```python
-print("HELLO WORLD")
-```
-Then run command:
-```shell
-python main.py
-```
-Result:
-> HELLO WORLD
-
-Do you remember the package we installed as an example: cowsay   
-Let's try using it to say "Hello World"
-
-Change your ```main.py``` content to:
-```python
-import cowsay
-
-cowsay.tux("Hello World")
-```
-Result:
-> Traceback (most recent call last):  
-> File "\<stdin\>", line 1, in \<module\>  
-> ModuleNotFoundError: No module named 'cowsay'
-
-Ooops ... as said earlier the package was installed in 
-the global python package directory before we created and activated our venv... 
-This means that we need to reinstall it again in our venv python package directory   
-
-*You should know how to do it yourself by now* 
-
-Let's re-run the command again   
-
-Result:
-```
-  ___________
-< Hello World >
-  ===========
-                \
-                 \
-                  \            
-                   .--.
-                  |o_o |
-                  |:_/ |
-                 //   \ \
-                (|     | )
-               /'\_   _/`\
-               \___)=(___/
-              
-              
-```
+This chapter comes with a folder with 2 notebooks that we are going to explore together. So let's switch to our notebook app !
