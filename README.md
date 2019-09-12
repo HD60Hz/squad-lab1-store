@@ -53,13 +53,12 @@ def create_store(name, inventory=[]):
 
 if __name__ == "__main__":
     store = create_store(
-			    name="my_store",
-				inventory=[("screen", 600.0, 3), ("mouse", 40, 10)]
-			)
-
-	print(store)
+        name="my_store",
+        inventory=[("screen", 600.0, 3), ("mouse", 40, 10)]
+    )
+    print(store)
 ```
-To avoid pointing to product attributes by index in the tuple, we can replace it with a nametuple. It is a subclass used to create tuple-like objects that have fields accessible by attribute lookup as well as being indexable and iterable.
+To avoid pointing to product attributes by index in the tuple, we can replace it with a namedtuple. It is a subclass used to create tuple-like objects that have fields accessible by attribute lookup as well as being indexable and iterable.
 
 ```python
 from collections import namedtuple
@@ -80,14 +79,14 @@ def create_store(name, inventory=[]):
 
 if __name__ == "__main__":
     store = create_store(
-			    name="my_store",
-				inventory=[
-					Product("screen", 600.0, 3),
-					Product("mouse", 40, 10)
-				]
-			)
+        name="my_store",
+        inventory=[
+            Product("screen", 600.0, 3),
+            Product("mouse", 40, 10)
+        ]
+    )
 
-	print(store)
+    print(store)
 ```
 
 We are ready to implement our use cases... or are we ?!!
@@ -109,8 +108,8 @@ def handler2():
     print("Handling command 2...")
 
 COMMANDS = [
-	Commande(1, "Command 1", handler1),
-	Commande(2, "Command 2", handler2)
+    Commande(1, "Command 1", handler1),
+    Commande(2, "Command 2", handler2)
 ]
 
 def print_commands():
@@ -131,8 +130,8 @@ def run_shell():
             if not handler:
                 print("You must choose a valid command")
                 continue
-
-			handler()
+            
+            handler()
 
         except ValueError:
             print("You must provide a command id")
@@ -168,18 +167,18 @@ COMMANDS = [
 ]
 
 def print_commands():
-	...
+    ...
 
 def get_handler(cmd_id):
-	...
+    ...
 
 def run_store_shell(store):
     print("=" * 34)
     print("{:^34}".format(f"Welcome in {store['name']}"))
     while True:
-       print("=" * 34)
-	   print("{:^34}".format(f"Items count : {store['items_count']} \n"))
-	   print_commands()
+        print("=" * 34)
+        print("{:^34}".format(f"Items count : {store['items_count']} \n"))
+        print_commands()
 
         try:
             cmd_id = int(input("your choice> "))
@@ -189,7 +188,7 @@ def run_store_shell(store):
                 print("You must choose a valid command")
                 continue
 
-			print("=" * 34)
+            print("=" * 34)
             handler(store)
 
         except ValueError:
@@ -231,16 +230,16 @@ We will suppose that product identifier is exactly the product index in the inve
 def list_inventory(store):
     inventory = store["inventory"]
     name_cell, price_cell, quantity_cell = "{:<10}", "{:>6}", "{:>6}"
-	for i, product in enumerate(inventory):
+    for i, product in enumerate(inventory):
         print(i,
-			  name_cell.format(product.name),
-			  price_cell.format(product.price),
-			  quantity_cell.format(product.quantity))
+            name_cell.format(product.name),
+            price_cell.format(product.price),
+            quantity_cell.format(product.quantity))
 ...
 if __name__ == '__main__':
     store = create_store('OPEN Store', [
-				Product("screen", 600.0, 3),
-				Product("mouse", 40, 10)
+            Product("screen", 600.0, 3),
+            Product("mouse", 40, 10)
 			])
     run_store_shell(store)
 ```
@@ -275,17 +274,17 @@ Result :
 * **Add product**
 ```python
 def add_product(store):
-	try:
-	    print("Add new product...")
-	    name = input("Name> ")
-	    price = float(input("Price> "))
-	    quantity = int(input("Quantity> "))
+    try:
+        print("Add new product...")
+        name = input("Name> ")
+        price = float(input("Price> "))
+        quantity = int(input("Quantity> "))
 
-	    store['inventory'].append(Product(name, price, quantity))
-	    store['items_count'] += quantity
+        store['inventory'].append(Product(name, price, quantity))
+        store['items_count'] += quantity
 
-	except ValueError:
-	    print("You must provide a valid product")
+    except ValueError:
+        print("You must provide a valid product")
 ```
 When we choose the command 2 corresponding to adding new  product we get :
 
@@ -309,18 +308,18 @@ Re-listing the inventory will prove that the new product is added
 * **Remove product**
 ```python
 def remove_product(store):
-	try:
-	    index = int(input("Choose a product> "))
+    try:
+        index = int(input("Choose a product> "))
 
-	    removed = store["inventory"].pop(index)
-	    store['items_count'] -= removed.quantity
+        removed = store["inventory"].pop(index)
+        store['items_count'] -= removed.quantity
 
-	    print("Product has been removed : {!r}".format(removed))
+        print("Product has been removed : {!r}".format(removed))
 
-	except ValueError:
-	    print("You must provide a product id")
-	except IndexError:
-	    print("You must choose an existing product")
+    except ValueError:
+        print("You must provide a product id")
+    except IndexError:
+        print("You must choose an existing product")
 ```
 When we choose the command 3 corresponding to removing existing product we get :
 
@@ -342,22 +341,22 @@ Notice that the id 0 is still present because the inventory has been reindexed (
 * **Modify product**
 ```python
 def modify_product(store):
-	try:
-	    index = int(input("Choose a product> "))
+    try:
+        index = int(input("Choose a product> "))
 
-	    modified = store['inventory'][index]
-	    print("Modify product : {!r}".format(modified))
-	    name = input(f"Name [{modified.name}]> ") or modified.name
-	    price = float(input(f"Price [{modified.price}]> ") or modified.price)
-	    quantity = int(input(f"Quantity [{modified.quantity}]> ") or modified.quantity)
+        modified = store['inventory'][index]
+        print("Modify product : {!r}".format(modified))
+        name = input(f"Name [{modified.name}]> ") or modified.name
+        price = float(input(f"Price [{modified.price}]> ") or modified.price)
+        quantity = int(input(f"Quantity [{modified.quantity}]> ") or modified.quantity)
 
-	    store['inventory'][index] = Product(name, price, quantity)
-	    store['items_count'] += (quantity - modified.quantity)
+        store['inventory'][index] = Product(name, price, quantity)
+        store['items_count'] += (quantity - modified.quantity)
 
-	except ValueError:
-	    print("You must provide a product id")
-	except IndexError:
-	    print("You must choose an existing product")
+    except ValueError:
+        print("You must provide a product id")
+    except IndexError:
+        print("You must choose an existing product")
 ```
 When we choose the command 4 corresponding to modifing existing product we get :
 
@@ -395,16 +394,17 @@ COMMANDS = [
 ]
 ...
 def run_store_shell(store):
-	while True:
-		...
-	    try:
-	        ...
-	        handler(store)
-			...
-		...
-	    except StopIteration:
-	        print("Bye !")
-	        break
+    while True:
+        ...
+        try:
+            ...
+            handler(store)
+            ...
+        ...
+        except StopIteration:
+            print("Bye !")
+            break
+        ...
 ```
 
 When we choose the command 0 to exit we get :
