@@ -1,5 +1,5 @@
 LAB1 SQUAD TRAINING - PYTHON
-===
+---
 
 ### Storify
 For the rest of this lab we are going to focus on the creation of a store management application. This will allow us to have a practical context for our Python learning.
