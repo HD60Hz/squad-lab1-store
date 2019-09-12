@@ -48,7 +48,7 @@ Result:
 > pip 19.1.1 from /usr/local/lib/python3.7/site-packages/pip (python 3.7)
 
 PIP can install packages from:  
-- VCS project urls
+- VCS project URLs
 - Local project directories
 - Local or remote source archives
 - Remote repositories called indexes... most known one is PyPI (Python Package Index)
@@ -58,9 +58,9 @@ When a package is installed with PIP using the command (example package - cowsay
 pip install cowsay
 ```
 Result:
-> Collecting cowsay   
-> Using cached https://files.pythonhosted.org/packages/d4/68/af23fbf90493044fc2ea83cd62923b9952c2d38eeeab83e0c016706bfbc8/cowsay-2.0.3-py2.py3-none-any.whl   
-> Installing collected packages: cowsay   
+> Collecting cowsay
+> Using cached https://files.pythonhosted.org/packages/d4/68/af23fbf90493044fc2ea83cd62923b9952c2d38eeeab83e0c016706bfbc8/cowsay-2.0.3-py2.py3-none-any.whl
+> Installing collected packages: cowsay
 > Successfully installed cowsay-2.0.3
 
 ... the manager will put the package files in python global package directories (e.g. site-packages)
@@ -105,7 +105,7 @@ env
 └── pyvenv.cfg
 </pre>
 
-Your virtual environment is created... **BUT** not activated   
+Your virtual environment is created... **BUT** not activated
 To activate your venv run command:
 ```shell
 source env/bin/activate
@@ -113,10 +113,10 @@ source env/bin/activate
 Result:
 > (env) Project $
 
-The "(env)" indicate that you are in the python virtual environment   
+The "(env)" indicate that you are in the python virtual environment
 Now all installed packages will be local to the project
 
-To desactivate your venv run command (from venv):
+To desactivate your virtual env run command :
 ```shell
 deactivate
 ```
@@ -127,34 +127,32 @@ Result:
 
 Now that we installed our environment and of course activated the virtual one... Shall we create a Hello Word program ?
 
-Start by creating a ```main.py``` in your project directory (root) with content:
+Start by creating a ```main.py``` in your project directory (root) with this content :
 ```python
 print("HELLO WORLD")
 ```
-Then run command:
+Then run the command :
 ```shell
 python main.py
 ```
 Result:
 > HELLO WORLD
 
-Do you remember the package we installed as an example: cowsay   
+Do you remember the package we installed as an example : cowsay
 Let's try using it to say "Hello World"
 
-Change your ```main.py``` content to:
+Change your ```main.py``` content to :
 ```python
 import cowsay
 
 cowsay.tux("Hello World")
 ```
 Result:
-> Traceback (most recent call last):  
-> File "\<stdin\>", line 1, in \<module\>  
+> Traceback (most recent call last):
+> File "\<stdin\>", line 1, in \<module\>
 > ModuleNotFoundError: No module named 'cowsay'
 
-Ooops ... as said earlier the package was installed in 
-the global python package directory before we created and activated our venv... 
-This means that we need to reinstall it again in our venv python package directory   
+Ooops ... as said earlier the package was installed in the global python package directory before we created and activated our venv... This means that we need to reinstall it again in our venv python package directory
 
 *You should know how to do it yourself by now* 
 
