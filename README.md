@@ -1,425 +1,252 @@
 LAB1 SQUAD TRAINING - PYTHON
 ---
 
-### Storify
-For the rest of this lab we are going to focus on the creation of a store management application. This will allow us to have a practical context for our Python learning.
-First we need to define some simple use case specifications that will bound our application and that we can extend later if we want to.
+### Refactoring
+Storify implementation of the last chapter was a great start into practicing Python programming. It is a small but close example to a real world app. However, even though a one file script is acceptable to target a single and low complexity problem, it is a bad practice for application developpement especially for apps relatively complex and with a futur need of evolution and scalability.
 
-#### Specifications
-* As a manager,
-	* I can list the inventory (id, name, price and products quantity).
-	* I can add a product to the inventory by providing a name, price and quantity
-	* I can remove a product from the inventory by id
-	* I can modify a product from the inventory by id
+So let's see how we can refactor our code to improve it
+* Seperate Interface and store
+* Encapsulate store logic in an object (OOP)
+* Use a command builtin library instead of our REPL implementation
+* Use types annotations
 
-#### Model
-Now we need to model our store before we can interact with it. To do so, we are going to use three data structure : Dictionary, List and Tuple.
+#### Seperation
+One way to think about the seperation is to suppose our store can be managed with multiple interfaces or can have no interface at all. They must be a loose coupling between the interfaces and the store.
+More importantly, they need to have a unidirectional relationship between them. A store doesn't need to know about the existance of an application interface. However the application interface should know about, and thus, carve itself based on its logic.
 
-The store will be represented by a dictionary of 3 values :
-* name : a string value representing the name of the store
-* inventory : a list of products
-* items_count : an integer containing the total number of products in the store
+Let's start by seperating storify into multiple files :
 
-The products will be represented by a tuple of 3 values :
-1. a string value representing the name
-2. a float value representing the price
-3. an integer value representing the quantity
+<pre>
+.
+├──...
+└── storify
+    ├── __init__.py
+    ├── interfaces
+    │   └── repl.py
+    ├── __main__.py
+    └── store.py
+</pre>
 
-```python
-store = {
-    "name": "",
-    "inventory": [("name1", "price1", "quantity1"), (...), ...],
-    "items_count": 0 #total numbers of items, 0 by default
-}
-```
+Now, Storify is a package containing a subpackage for the interfaces and a store module. We moved ``create_store`` and ``Product`` definitions into ``store``  and kept the rest in ``repl`` module
 
-It would be good to create our store using a factory function that will encapsulate our model. This function will receive 2 arguments : a name for the store, and an initial inventory (optional).
+The ``__init__.py`` is the initialisation file for the storify package. We can use it to define a ``main`` function that creates a store and run it in a REPL
 
 ```python
-# product mapping
-P_NAME, P_PRICE, P_QUANTITY = range(3)
+from storify.interfaces.repl import run_repl
+from storify.store import create_store, Product
 
-def create_store(name, inventory=[]):
-    items_count = 0
-    for product in inventory:
-        items_count += product[P_QUANTITY]
-
-    return {
-        "name": name,
-        "inventory": inventory,
-        "items_count": items_count
-    }
-
-
-if __name__ == "__main__":
+def main():
     store = create_store(
-			    name="my_store",
-				inventory=[("screen", 600.0, 3), ("mouse", 40, 10)]
-			)
-
-	print(store)
+        name="OPEN Store",
+		inventory=[
+            Product("screen", 600.0, 3),
+			Product("mouse", 40, 10)
+        ]
+    )
+    run_repl(store)
 ```
-To avoid pointing to product attributes by index in the tuple, we can replace it with a nametuple. It is a subclass used to create tuple-like objects that have fields accessible by attribute lookup as well as being indexable and iterable.
+Notice the imports statements on top. They use relative paths to modules in the form of : \<package\>.\<subpackage\>..\<module\> to import elements from them. To allow python interpreter to know the location of the packages that you import from, you need to add the location of the root of the project to python path either by ``PYTHONPATH`` environnement variable or ``sys.path``
+
+To keep the same command (kind of) for running storify, we can use ``__main__.py`` as the entry point for the application
 
 ```python
-from collections import namedtuple
-
-Product = namedtuple("Product", ["name", "price", "quantity"])
-
-def create_store(name, inventory=[]):
-    items_count = 0
-    for product in inventory:
-        items_count += product.quantity
-
-    return {
-        "name": name,
-        "inventory": inventory,
-        "items_count": items_count
-    }
-
-
-if __name__ == "__main__":
-    store = create_store(
-			    name="my_store",
-				inventory=[
-					Product("screen", 600.0, 3),
-					Product("mouse", 40, 10)
-				]
-			)
-
-	print(store)
-```
-
-We are ready to implement our use cases... or are we ?!!
-
-#### REPL
-We need an interface to allow the manager to interact with his store (Shell, GUI, Web API...). We will stick with the common shell interface (for now) and we are going to use a [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop) (read–eval–print–loop) system.
-
-##### Exercice
-Create a simplistic REPL using only an infinite loop, input/print functions and a command/handler pattern.
-
-##### Solution
-```python
-Command = namedtuple("Command", ["id", "name", "handler"])
-
-def handler1():
-    print("Handling command 1...")
-
-def handler2():
-    print("Handling command 2...")
-
-COMMANDS = [
-	Commande(1, "Command 1", handler1),
-	Commande(2, "Command 2", handler2)
-]
-
-def print_commands():
-    for command in COMMANDS:
-        print("\t", command.id, " - ", command.name, sep=" ")
-
-def get_handler(cmd_id):
-    return next((command.handler for command in COMMANDS if command.id == cmd_id), None)
-
-def run_shell():
-    while True:
-        print_commands()
-
-        try:
-            cmd_id = int(input("your choice> "))
-
-            handler = get_handler(cmd_id)
-            if not handler:
-                print("You must choose a valid command")
-                continue
-
-			handler()
-
-        except ValueError:
-            print("You must provide a command id")
-
-if __name__ == "__main__":
-    run_shell()
-```
-
-#### Use cases
-  Based on the example above lets create a REPL version for our store, then start implementing the use cases defined in the beginning of the chapter
-```python
-...
-def create_store(name, inventory=[]):
-   ...
-
-def list_inventory(store):
-    print("Handling...")
-
-def add_product(store):
-    print("Handling...")
-
-def remove_product(store):
-    print("Handling...")
-
-def modify_product(store):
-    print("Handling...")
-
-COMMANDS = [
-    Command(1, "List inventory", list_inventory),
-	Command(2, "Add product", add_product),
-	Command(3, "Remove product", remove_product),
-	Command(4, "Modify product", modify_product),
-]
-
-def print_commands():
-	...
-
-def get_handler(cmd_id):
-	...
-
-def run_store_shell(store):
-    print("=" * 34)
-    print("{:^34}".format(f"Welcome in {store['name']}"))
-    while True:
-       print("=" * 34)
-	   print("{:^34}".format(f"Items count : {store['items_count']} \n"))
-	   print_commands()
-
-        try:
-            cmd_id = int(input("your choice> "))
-
-            handler = get_handler(cmd_id)
-            if not handler:
-                print("You must choose a valid command")
-                continue
-
-			print("=" * 34)
-            handler(store)
-
-        except ValueError:
-            print("You must provide a command id")
-
+from storify import main
 
 if __name__ == '__main__':
-    store = create_store('OPEN Store')
-    run_store_shell(store)
+    main()
 ```
 
-You can notice that, with this version, each command handler receive a context (store) as argument. This will allow them to update the mutable context to achive their purpose.
+Let's test it. run the command :
 
-When we run the program
 ```shell
-python storify.py
+python storify
 ```
-Result :
+
 <pre>
 
-=================================
+==================================
       Welcome in OPEN Store
 ==================================
         Items count : 13
 
-	 1  -  List inventory
-	 2  -  Add product
-	 3  -  Remove product
-	 4  -  Modify product
-your choice>
-
+         0  -  Exit
+         1  -  List inventory
+         2  -  Add product
+         3  -  Remove product
+         4  -  Modify product
+your choice> 1
 </pre>
 
-We will suppose that product identifier is exactly the product index in the inventory list. Again, for the sake of simplicity.
+It still works !
 
-* **List inventory**
+We will continue our refactoring by encapsulating the store logic inside a class of the store module
+
 ```python
-...
-def list_inventory(store):
-    inventory = store["inventory"]
-    name_cell, price_cell, quantity_cell = "{:<10}", "{:>6}", "{:>6}"
-	for i, product in enumerate(inventory):
-        print(i,
-			  name_cell.format(product.name),
-			  price_cell.format(product.price),
-			  quantity_cell.format(product.quantity))
-...
-if __name__ == '__main__':
-    store = create_store('OPEN Store', [
-				Product("screen", 600.0, 3),
-				Product("mouse", 40, 10)
-			])
-    run_store_shell(store)
-```
-When we choose the command 1 corresponding to inventory listing we get :
+from collections import namedtuple
+from typing import List
 
-<pre>
-0 screen      600.0      3
-1 mouse          40     10
-</pre>
+Product = namedtuple("Product", ["name", "price", "quantity"])
 
-A better way to print a list in tabular form is to use some existing library like ``tabulate``
-We begin by installing it using :
-```shell
-pip install tabulate
+class Store:
+    def __init__(self, name: str, inventory: List[Product] = []):
+        self.name = name
+        self.__inventory = [*inventory]
+        self.__items_count = 0
+
+	    for product in inventory:
+            self.__items_count += product.quantity
+
+    def add_product(self, name: str, price: float, quantity: int):
+        try:
+            price = float(price)
+            quantity = int(quantity)
+            self.__inventory.append(Product(name, price, quantity))
+
+        except ValueError:
+            raise ValueError(f'Invalid product input : {name}, {price}, {quantity}')
+
+        self.__items_count += quantity
+
+    def remove_product(self, product: Product):
+        try:
+            self.__inventory.remove(product)
+
+        except ValueError:
+            raise ValueError(f'Unknown product : {product!r}')
+
+        self.__items_count -= product.quantity
+
+    @property
+    def inventory(self) -> List[Product]:
+        return self.__inventory[:]
+
+	@property
+	def items_count(self) -> int:
+	    return self.__items_count
 ```
-Next, we need to import it in our code and use it
+
+Now the store can be created as an object.  Most importantly we encapsulated and protected the store data by hiding it and only allowing the management of the inventory through an API that validates the inputs (raising exception with comprehensive messages) and limits the actions
+By the way, we dont need the factory function ``create_store`` anymore
+
+Did you notice the use of [type hinting](https://docs.python.org/3/library/typing.html)... it is supported since version 3.5 of python and have been improved up on throught out minor releases (even 3.6 ones). It does not add any runtime behavior (mostly) and it is just a hint for type checkers and static code analysers (ex: IDE)... Not necessary but recommanded for large project, we will continue using it in our lab
+
+Next, we have to adapt our REPL command handlers to use the new store representation. While doing this, we are going to refactor the REPL to use the builtin [``Cmd``](https://docs.python.org/3/library/cmd.html) library... We reinvented the wheel just to learn !
+
 ```python
+from cmd import Cmd
 from tabulate import tabulate
-...
-def list_inventory(store):
-    print(tabulate(store["inventory"], headers="keys", showindex=True))
-...
+from storify.store import Store
+
+class StoreREPL(Cmd):
+    prompt = "<Store>"
+
+  def __init__(self, store: Store):
+        self.__store = store
+        self.intro = f'Welcome to {store.name} store. Type help or ? to list commands.\n'
+  super().__init__()
+
+    def do_list_inventory(self, args):
+        """List inventory"""
+	    print(tabulate(self.__store.inventory, headers="keys", showindex=True))
+
+    def do_add_product(self, args):
+        """Add new product to inventory"""
+		print("Add new product...")
+
+        name = input("Name> ")
+        price = input("Price> ")
+        quantity = input("Quantity> ")
+
+        try:
+            self.__store.add_product(name, price, quantity)
+
+        except ValueError:
+            print("Error: You must provide a valid product")
+
+    def do_remove_product(self, args):
+        """Remove existing product from inventory"""
+		try:
+            index = int(input("Choose a product> "))
+            removed = self.__store.inventory[index]
+
+            self.__store.remove_product(removed)
+            print("Error: Product has been removed : {!r}".format(removed))
+
+        except (IndexError, ValueError):
+            print("Error: You must provide an existing product id")
+
+    def do_modify_product(self, args):
+        """Modify existing product in inventory"""
+		try:
+            index = int(input("Choose a product> "))
+            modified = self.__store.inventory[index]
+
+        except (IndexError, ValueError):
+            print("Error: You must provide an existing product id")
+
+        print("Modify product : {!r}".format(modified))
+
+        name = input(f"Name [{modified.name}]> ") or modified.name
+        price = input(f"Price [{modified.price}]> ") or modified.price
+        quantity = input(f"Quantity [{modified.quantity}]> ") or modified.quantity
+
+        try:
+            self.__store.add_product(name, price, quantity)
+
+        except ValueError:
+            print("Error: You must provide a valid product")
+
+        try:
+            self.__store.remove_product(modified)
+
+        except ValueError:
+            assert False, "Unexpected Error!"
+
+	def do_exit(self, args):
+		"""Exit store"""
+		return True
 ```
-Result :
+
+The modify product use case combines adding new product to the store and removing the old one. It is just a simplification due to the index of products not beeing important
+
+The main function becomes :
+
+```python
+from storify.interfaces.repl import StoreREPL
+from storify.store import Product, Store
+
+def main():
+    store = Store(
+        name="OPEN Store",
+		inventory=[
+            Product("screen", 600.0, 3),
+			Product("mouse", 40, 10)
+        ]
+    )
+    StoreREPL(store).cmdloop()
+```
+
+Run the application now to see if it is working
+
+```shell
+python storify
+```
+Result:
+
 <pre>
+Welcome to OPEN Store store. Type help or ? to list commands.
+
+Store>?
+
+Documented commands (type help <topic>):
+========================================
+add_product  exit  help  list_inventory  modify_product  remove_product
+
+<Store>list_inventory
     name      price    quantity
 --  ------  -------  ----------
  0  screen      600           3
  1  mouse        40          10
+Store>
 </pre>
 
-* **Add product**
-```python
-def add_product(store):
-	try:
-	    print("Add new product...")
-	    name = input("Name> ")
-	    price = float(input("Price> "))
-	    quantity = int(input("Quantity> "))
-
-	    store['inventory'].append(Product(name, price, quantity))
-	    store['items_count'] += quantity
-
-	except ValueError:
-	    print("You must provide a valid product")
-```
-When we choose the command 2 corresponding to adding new  product we get :
-
-<pre>
-Add new product...
-Name> Chocolat
-Price> 40
-Quantity> 30
-</pre>
-
-Re-listing the inventory will prove that the new product is added
-
-<pre>
-    name        price    quantity
---  --------  -------  ----------
- 0  screen        600           3
- 1  mouse          40          10
- 2  Chocolat       40          30
-</pre>
-
-* **Remove product**
-```python
-def remove_product(store):
-	try:
-	    index = int(input("Choose a product> "))
-
-	    removed = store["inventory"].pop(index)
-	    store['items_count'] -= removed.quantity
-
-	    print("Product has been removed : {!r}".format(removed))
-
-	except ValueError:
-	    print("You must provide a product id")
-	except IndexError:
-	    print("You must choose an existing product")
-```
-When we choose the command 3 corresponding to removing existing product we get :
-
-<pre>
-Choose a product> 0
-Product has been removed : Product(name='screen', price=600.0, quantity=3)
-</pre>
-
-Re-listing the inventory will prove that the chosen product is removed
-
-<pre>
-    name      price    quantity
---  ------  -------  ----------
- 0  mouse        40          10
-</pre>
-
-Notice that the id 0 is still present because the inventory has been reindexed (id = index for simplicity)
-
-* **Modify product**
-```python
-def modify_product(store):
-	try:
-	    index = int(input("Choose a product> "))
-
-	    modified = store['inventory'][index]
-	    print("Modify product : {!r}".format(modified))
-	    name = input(f"Name [{modified.name}]> ") or modified.name
-	    price = float(input(f"Price [{modified.price}]> ") or modified.price)
-	    quantity = int(input(f"Quantity [{modified.quantity}]> ") or modified.quantity)
-
-	    store['inventory'][index] = Product(name, price, quantity)
-	    store['items_count'] += (quantity - modified.quantity)
-
-	except ValueError:
-	    print("You must provide a product id")
-	except IndexError:
-	    print("You must choose an existing product")
-```
-When we choose the command 4 corresponding to modifing existing product we get :
-
-<pre>
-Choose a product> 0
-Modify product : Product(name='screen', price=600.0, quantity=3)
-Name [screen]> Chocolat
-Price [600.0]>
-Quantity [3]>
-</pre>
-
-Re-listing the inventory will prove that the chosen product has been modified
-<pre>
-    name        price    quantity
---  --------  -------  ----------
- 0  Chocolat      600           3
- 1  mouse          40          10
-</pre>
-
-* **Exiting**
-
-Even though we did not specify it at the beginning, we need a last use case to allow the manager to exit his store gracefully.
-Let's add a command ``Exit``
-
-We implemented the REPL system so that each time a command is chosen the corresponding handler is invoked. We have to add a way for the handler to notify the REPL to stop its infinite loop and allow the program to exit.
-
-One hacky solution (for learning purpose) is to raise an exception to notify from the handler to allow REPL to stop by catching it.
-
-> StopIteration is a builtin exception used to stop iteration over iterators
-
-```python
-COMMANDS = [
-    Command(0, "Exit", lambda _: exec('raise StopIteration'))
-    ...
-]
-...
-def run_store_shell(store):
-	while True:
-		...
-	    try:
-	        ...
-	        handler(store)
-			...
-		...
-	    except StopIteration:
-	        print("Bye !")
-	        break
-```
-
-When we choose the command 0 to exit we get :
-
-<pre>
-        Items count : 13
-
-	 0  -  Exit
-	 1  -  List inventory
-	 2  -  Add product
-	 3  -  Remove product
-	 4  -  Modify product
-your choice> 0
-==================================
-Bye !
-
-Process finished with exit code 0
-</pre>
