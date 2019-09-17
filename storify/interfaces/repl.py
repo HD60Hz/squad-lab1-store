@@ -72,4 +72,5 @@ class StoreREPL(Cmd):
 
     def do_exit(self, args):
         """Exit store"""
+        self.__store.save_inventory()
         return True

@@ -1,3 +1,4 @@
+import os
 from collections import namedtuple
 from typing import List
 
@@ -5,12 +6,17 @@ Product = namedtuple("Product", ["name", "price", "quantity"])
 
 
 class Store:
-    def __init__(self, name: str, inventory: List[Product] = []):
+    def __init__(self, name: str):
         self.name = name
-        self.__inventory = [*inventory]
+        self.__inventory = []
         self.__items_count = 0
 
-        for product in inventory:
+        from storify.db.inventory import InventoryFileDB, Types
+        dir_path = os.path.dirname(os.path.abspath(__file__))
+        self.__inventory_db = InventoryFileDB(dir_path, Types.JSON)
+
+        for product in self.__inventory_db.load_products():
+            self.__inventory.append(product)
             self.__items_count += product.quantity
 
     def add_product(self, name: str, price: float, quantity: int):
@@ -35,6 +41,9 @@ class Store:
             raise ValueError(f'Unknown product : {product!r}')
 
         self.__items_count -= product.quantity
+
+    def save_inventory(self):
+        self.__inventory_db.save_products(self.__inventory)
 
     @property
     def inventory(self) -> List[Product]:
