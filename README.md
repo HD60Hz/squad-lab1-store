@@ -1,252 +1,210 @@
 LAB1 SQUAD TRAINING - PYTHON
 ---
 
-### Refactoring
-Storify implementation of the last chapter was a great start into practicing Python programming. It is a small but close example to a real world app. However, even though a one file script is acceptable to target a single and low complexity problem, it is a bad practice for application developpement especially for apps relatively complex and with a futur need of evolution and scalability.
+### Files
+Until now, the manager had to start the storify application and keep it running to avoid losing the inventory data. In fact, all the data added or changed in the different use cases is stored in memory. so in case of an exit, everything is lost.
+In this chapter, we will improve our system by adding a file based  persistance for the inventory. The file types that will be used are CSV and JSON.
+Let's get started !
 
-So let's see how we can refactor our code to improve it
-* Seperate Interface and store
-* Encapsulate store logic in an object (OOP)
-* Use a command builtin library instead of our REPL implementation
-* Use types annotations
-
-#### Seperation
-One way to think about the seperation is to suppose our store can be managed with multiple interfaces or can have no interface at all. They must be a loose coupling between the interfaces and the store.
-More importantly, they need to have a unidirectional relationship between them. A store doesn't need to know about the existance of an application interface. However the application interface should know about, and thus, carve itself based on its logic.
-
-Let's start by seperating storify into multiple files :
+### Inventory File DB
+First of all we have to update our project structure by adding a ``db`` package
 
 <pre>
-.
-├──...
-└── storify
-    ├── __init__.py
-    ├── interfaces
-    │   └── repl.py
-    ├── __main__.py
-    └── store.py
+storify
+    ├── db
+    │   ├── inventory.py
+    ...
 </pre>
 
-Now, Storify is a package containing a subpackage for the interfaces and a store module. We moved ``create_store`` and ``Product`` definitions into ``store``  and kept the rest in ``repl`` module
-
-The ``__init__.py`` is the initialisation file for the storify package. We can use it to define a ``main`` function that creates a store and run it in a REPL
+``inventory.py`` contains database implementation to store an inventory. We will focus on the file implementation for now
 
 ```python
-from storify.interfaces.repl import run_repl
-from storify.store import create_store, Product
+import os
 
-def main():
-    store = create_store(
-        name="OPEN Store",
-		inventory=[
-            Product("screen", 600.0, 3),
-			Product("mouse", 40, 10)
-        ]
-    )
-    run_repl(store)
+class Types(Enum):
+    CSV = "csv"
+	JSON = "json"
+
+
+class InventoryFileDB:
+    file_name = "inventory"
+
+  def __init__(self, dir_path: str, file_type: Types = Types.CSV):
+        if file_type not in Types:
+            raise ValueError("Error: Invalid inventory database file type")
+
+        if not (os.path.isdir(dir_path) and os.access(dir_path, os.W_OK)):
+            raise Exception("Error: Invalid inventory database directory path")
+
+        self.__dir_path = dir_path
+        self.__file_type = file_type
 ```
-Notice the imports statements on top. They use relative paths to modules in the form of : \<package\>.\<subpackage\>..\<module\> to import elements from them. To allow python interpreter to know the location of the packages that you import from, you need to add the location of the root of the project to python path either by ``PYTHONPATH`` environnement variable or ``sys.path``
+Because we want to support multiple types of file. The ``Types`` Enum is a class definition that allow to listing, referencing and hinting (var types) the file types that well be used (for example InventoryFileDB instanciation)
 
-To keep the same command (kind of) for running storify, we can use ``__main__.py`` as the entry point for the application
+To create the file database, we need to provide some configuration like the path in the file system where to put the inventory data and inside a file of which type. Using the ``os`` module, we can validate the existance and write access of the target directory
+
+For sake of simplicity, we will restrict the api of the database to : ``save_products`` and ``load_products``
+
+#### Save products
+Saving data to a CSV or a JSON file are technically different operations. Hence, it is a good practice to seperate the implementation version then delegate accordingly based on the configuration (chosen file type)
+The configuration allows us also to resolve the path of the storage file : by concatenating the directory path, the file name defined as class attribut of InventoryFileDB and file extension (csv or json). The resolved path can be communicated as argument to subroutines :``save_csv_products``, ``save_json_products``
 
 ```python
-from storify import main
+	...
+    def save_products(self, products: Iterable[Product]):
+        path = os.path.join(self.__dir_path, f"{self.file_name}.{self.__file_type.value}")
 
-if __name__ == '__main__':
-    main()
+        if self.__file_type == Types.CSV:
+            self._save_csv_products(path, products)
+        else:
+            self._save_json_products(path, products)
+	...
 ```
 
-Let's test it. run the command :
+``json`` Python builtin library provide some simple functions to marshell (dump/dumps) and unmarshell (load/loads) Python objects into/from json formated strings
 
-```shell
-python storify
-```
-
-<pre>
-
-==================================
-      Welcome in OPEN Store
-==================================
-        Items count : 13
-
-         0  -  Exit
-         1  -  List inventory
-         2  -  Add product
-         3  -  Remove product
-         4  -  Modify product
-your choice> 1
-</pre>
-
-It still works !
-
-We will continue our refactoring by encapsulating the store logic inside a class of the store module
+``csv`` Python builtin library allows the creation of writers and readers from IO file objects (``open``). The writer can write headers and rows in the targeted CSV file. The reader is an iterable that can load the file rows
 
 ```python
-from collections import namedtuple
-from typing import List
+...
+def _save_csv_products(self, file_path, products: Iterable[Product]):
+    with open(file_path, 'w') as inventory:
+        for product in products:
+            writer = csv.writer(inventory)
+            writer.writerow(product)
 
-Product = namedtuple("Product", ["name", "price", "quantity"])
+def _save_json_product(self, file_path, products: Iterable[Product]):
+    with open(file_path, 'w') as inventory:
+        inventory.write(json.dumps(products))
+...
+```
+#### Load products
+Independently of the file type configuration, loading product must verify the existance of either a CSV or JSON file then load data from them
+Similarly to saving products, we need to seperate the implementation versions (CSV, JSON) then invoke the appropriate one
 
+```python
+...
+def load_products(self) -> Iterable[Product]:
+    path = os.path.join(self.__dir_path, f"{self.file_name}.{self.__file_type.value}")
+
+    if not os.path.exists(path):
+        return []
+
+    if self.__file_type == Types.CSV:
+        return self._load_csv_products(path)
+
+    if self.__file_type == Types.JSON:
+        return self._load_json_products(path)
+
+def _load_csv_products(self, file_path: str):
+    with open(file_path, 'r') as inventory:
+        reader = csv.reader(inventory)
+        for product in reader:
+            yield Product(product[0], float(product[1]), int(product[2]))
+
+def _load_json_products(self, file_path):
+    with open(file_path, 'r') as inventory:
+        products = json.loads(inventory.read())
+        for product in products:
+            yield Product(product[0], float(product[1]), int(product[2]))
+```
+
+``load_products`` returns a generator (kind of iterator) that will yield one product at time and thus save some memory in the case of CSV (JSON require all the file content to have a valid and deserializable string)
+
+### Persistance of store inventory
+Let's specify a simple workflow for the persistance and loading of the store inventory. We will assume that when a store is created it will automatically load its inventory from the file database. No need for the initial/provided inventory. On the other hand we will assume, and this is for simplicity purposes,  that exiting the RELP with trigger the persistance of all the inventory
+
+```python
 class Store:
-    def __init__(self, name: str, inventory: List[Product] = []):
+    def __init__(self, name: str):
         self.name = name
-        self.__inventory = [*inventory]
+        self.__inventory = []
         self.__items_count = 0
 
-	    for product in inventory:
+		from storify.db.inventory import InventoryFileDB, Types
+        dir_path = os.path.dirname(os.path.abspath(__file__))
+        self.__inventory_db = InventoryFileDB(dir_path, Types.JSON)
+
+        for product in self.__inventory_db.load_products():
+            self.__inventory.append(product)
             self.__items_count += product.quantity
-
-    def add_product(self, name: str, price: float, quantity: int):
-        try:
-            price = float(price)
-            quantity = int(quantity)
-            self.__inventory.append(Product(name, price, quantity))
-
-        except ValueError:
-            raise ValueError(f'Invalid product input : {name}, {price}, {quantity}')
-
-        self.__items_count += quantity
-
-    def remove_product(self, product: Product):
-        try:
-            self.__inventory.remove(product)
-
-        except ValueError:
-            raise ValueError(f'Unknown product : {product!r}')
-
-        self.__items_count -= product.quantity
-
-    @property
-    def inventory(self) -> List[Product]:
-        return self.__inventory[:]
-
-	@property
-	def items_count(self) -> int:
-	    return self.__items_count
 ```
+In the init/construction method we instantiate an inventory file database by providing the absolute path of ``store`` module parent directory, aka ``storify`` and a hardcoded file type
+This database is then kept as a store attributes for future persistance
 
-Now the store can be created as an object.  Most importantly we encapsulated and protected the store data by hiding it and only allowing the management of the inventory through an API that validates the inputs (raising exception with comprehensive messages) and limits the actions
-By the way, we dont need the factory function ``create_store`` anymore
+Maybe some of you have noticed the import inside ``__init__`` (yeah import can be everywhere). The reason behind that is to avoid a circular dependencies (store imports InventoryFileDB, and db/inventory import Product)
+Normally circular dependencies are sign of bad design. It means that there may be a better design where the depend and the dependency can joined in the same module. In our case, the solution above is good enough
 
-Did you notice the use of [type hinting](https://docs.python.org/3/library/typing.html)... it is supported since version 3.5 of python and have been improved up on throught out minor releases (even 3.6 ones). It does not add any runtime behavior (mostly) and it is just a hint for type checkers and static code analysers (ex: IDE)... Not necessary but recommanded for large project, we will continue using it in our lab
+Because ``load_products`` return a generator we can simply iterate over the result to populate our inventory
 
-Next, we have to adapt our REPL command handlers to use the new store representation. While doing this, we are going to refactor the REPL to use the builtin [``Cmd``](https://docs.python.org/3/library/cmd.html) library... We reinvented the wheel just to learn !
+To allow the REPL to save on exit, we will add ``save_inventory`` to store api
 
 ```python
-from cmd import Cmd
-from tabulate import tabulate
-from storify.store import Store
-
-class StoreREPL(Cmd):
-    prompt = "<Store>"
-
-  def __init__(self, store: Store):
-        self.__store = store
-        self.intro = f'Welcome to {store.name} store. Type help or ? to list commands.\n'
-  super().__init__()
-
-    def do_list_inventory(self, args):
-        """List inventory"""
-	    print(tabulate(self.__store.inventory, headers="keys", showindex=True))
-
-    def do_add_product(self, args):
-        """Add new product to inventory"""
-		print("Add new product...")
-
-        name = input("Name> ")
-        price = input("Price> ")
-        quantity = input("Quantity> ")
-
-        try:
-            self.__store.add_product(name, price, quantity)
-
-        except ValueError:
-            print("Error: You must provide a valid product")
-
-    def do_remove_product(self, args):
-        """Remove existing product from inventory"""
-		try:
-            index = int(input("Choose a product> "))
-            removed = self.__store.inventory[index]
-
-            self.__store.remove_product(removed)
-            print("Error: Product has been removed : {!r}".format(removed))
-
-        except (IndexError, ValueError):
-            print("Error: You must provide an existing product id")
-
-    def do_modify_product(self, args):
-        """Modify existing product in inventory"""
-		try:
-            index = int(input("Choose a product> "))
-            modified = self.__store.inventory[index]
-
-        except (IndexError, ValueError):
-            print("Error: You must provide an existing product id")
-
-        print("Modify product : {!r}".format(modified))
-
-        name = input(f"Name [{modified.name}]> ") or modified.name
-        price = input(f"Price [{modified.price}]> ") or modified.price
-        quantity = input(f"Quantity [{modified.quantity}]> ") or modified.quantity
-
-        try:
-            self.__store.add_product(name, price, quantity)
-
-        except ValueError:
-            print("Error: You must provide a valid product")
-
-        try:
-            self.__store.remove_product(modified)
-
-        except ValueError:
-            assert False, "Unexpected Error!"
-
-	def do_exit(self, args):
-		"""Exit store"""
-		return True
+...
+def save_inventory(self):
+    self.__inventory_db.save_products(self.__inventory)
 ```
 
-The modify product use case combines adding new product to the store and removing the old one. It is just a simplification due to the index of products not beeing important
-
-The main function becomes :
+and call it from REPL
 
 ```python
-from storify.interfaces.repl import StoreREPL
-from storify.store import Product, Store
+def do_exit(self, args):
+    """Exit store"""
+    self.__store.save_inventory()
+    return True
+```
 
+Finally we need to quickly adapt the main function
+
+```python
 def main():
-    store = Store(
-        name="OPEN Store",
-		inventory=[
-            Product("screen", 600.0, 3),
-			Product("mouse", 40, 10)
-        ]
-    )
+    store = Store(name="OPEN Store")
     StoreREPL(store).cmdloop()
 ```
 
-Run the application now to see if it is working
+Let's test ALL of this now
+* Clear any inventory file (CSV, JSON)
+* Start storify and list inventory to show it is empty
+* Add product
+* Exit storify
+* Verify the existance of the inventory file
+* Restart storify and list inventory to show it contains 1 product
 
-```shell
-python storify
-```
 Result:
+<pre>
+Welcome to OPEN Store store. Type help or ? to list commands.
+
+Store>list_inventory
+
+Store>add_product
+Add new product...
+Name> Chocolate
+Price> 40
+Quantity> 10
+Store>exit
+
+Process finished with exit code 0
+</pre>
+
+New file created
+<pre>
+storify
+    ├── ...
+    ├── inventory.csv
+</pre>
+with content
+<pre>
+Chocolate,40.0,10
+</pre>
+
+Restarting storify
 
 <pre>
 Welcome to OPEN Store store. Type help or ? to list commands.
 
-Store>?
-
-Documented commands (type help <topic>):
-========================================
-add_product  exit  help  list_inventory  modify_product  remove_product
-
-<Store>list_inventory
-    name      price    quantity
---  ------  -------  ----------
- 0  screen      600           3
- 1  mouse        40          10
+Store>list_inventory
+    name         price    quantity
+--  ---------  -------  ----------
+ 0  Chocolate       40          10
 Store>
 </pre>
-
