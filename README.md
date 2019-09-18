@@ -38,9 +38,9 @@ from storify.store import create_store, Product
 def main():
     store = create_store(
         name="OPEN Store",
-		inventory=[
+        inventory=[
             Product("screen", 600.0, 3),
-			Product("mouse", 40, 10)
+            Product("mouse", 40, 10)
         ]
     )
     run_repl(store)
@@ -93,7 +93,7 @@ class Store:
         self.__inventory = [*inventory]
         self.__items_count = 0
 
-	    for product in inventory:
+        for product in inventory:
             self.__items_count += product.quantity
 
     def add_product(self, name: str, price: float, quantity: int):
@@ -120,9 +120,9 @@ class Store:
     def inventory(self) -> List[Product]:
         return self.__inventory[:]
 
-	@property
-	def items_count(self) -> int:
-	    return self.__items_count
+    @property
+    def items_count(self) -> int:
+        return self.__items_count
 ```
 
 Now the store can be created as an object.  Most importantly we encapsulated and protected the store data by hiding it and only allowing the management of the inventory through an API that validates the inputs (raising exception with comprehensive messages) and limits the actions
@@ -140,18 +140,18 @@ from storify.store import Store
 class StoreREPL(Cmd):
     prompt = "<Store>"
 
-  def __init__(self, store: Store):
+    def __init__(self, store: Store):
         self.__store = store
         self.intro = f'Welcome to {store.name} store. Type help or ? to list commands.\n'
-  super().__init__()
+        super().__init__()
 
     def do_list_inventory(self, args):
         """List inventory"""
-	    print(tabulate(self.__store.inventory, headers="keys", showindex=True))
+        print(tabulate(self.__store.inventory, headers="keys", showindex=True))
 
     def do_add_product(self, args):
         """Add new product to inventory"""
-		print("Add new product...")
+        print("Add new product...")
 
         name = input("Name> ")
         price = input("Price> ")
@@ -165,7 +165,7 @@ class StoreREPL(Cmd):
 
     def do_remove_product(self, args):
         """Remove existing product from inventory"""
-		try:
+        try:
             index = int(input("Choose a product> "))
             removed = self.__store.inventory[index]
 
@@ -177,7 +177,7 @@ class StoreREPL(Cmd):
 
     def do_modify_product(self, args):
         """Modify existing product in inventory"""
-		try:
+        try:
             index = int(input("Choose a product> "))
             modified = self.__store.inventory[index]
 
@@ -202,9 +202,9 @@ class StoreREPL(Cmd):
         except ValueError:
             assert False, "Unexpected Error!"
 
-	def do_exit(self, args):
-		"""Exit store"""
-		return True
+    def do_exit(self, args):
+        """Exit store"""
+        return True
 ```
 
 The modify product use case combines adding new product to the store and removing the old one. It is just a simplification due to the index of products not beeing important
@@ -218,9 +218,9 @@ from storify.store import Product, Store
 def main():
     store = Store(
         name="OPEN Store",
-		inventory=[
+        inventory=[
             Product("screen", 600.0, 3),
-			Product("mouse", 40, 10)
+            Product("mouse", 40, 10)
         ]
     )
     StoreREPL(store).cmdloop()
