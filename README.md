@@ -183,6 +183,7 @@ class StoreREPL(Cmd):
 
         except (IndexError, ValueError):
             print("Error: You must provide an existing product id")
+            return
 
         print("Modify product : {!r}".format(modified))
 
@@ -192,6 +193,7 @@ class StoreREPL(Cmd):
 
         try:
             self.__store.add_product(name, price, quantity)
+            return
 
         except ValueError:
             print("Error: You must provide a valid product")
