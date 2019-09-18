@@ -38,7 +38,7 @@ class StoreREPL(Cmd):
             removed = self.__store.inventory[index]
 
             self.__store.remove_product(removed)
-            print("Error: Product has been removed : {!r}".format(removed))
+            print("Product has been removed : {!r}".format(removed))
 
         except (IndexError, ValueError):
             print("Error: You must provide an existing product id")
@@ -51,6 +51,7 @@ class StoreREPL(Cmd):
 
         except (IndexError, ValueError):
             print("Error: You must provide an existing product id")
+            return
 
         print("Modify product : {!r}".format(modified))
 
@@ -63,6 +64,7 @@ class StoreREPL(Cmd):
 
         except ValueError:
             print("Error: You must provide a valid product")
+            return
 
         try:
             self.__store.remove_product(modified)
