@@ -23,7 +23,7 @@ import os
 
 class Types(Enum):
     CSV = "csv"
-	JSON = "json"
+    JSON = "json"
 
 
 class InventoryFileDB:
@@ -39,7 +39,7 @@ class InventoryFileDB:
         self.__dir_path = dir_path
         self.__file_type = file_type
 ```
-Because we want to support multiple types of file. The ``Types`` Enum is a class definition that allow to listing, referencing and hinting (var types) the file types that well be used (for example InventoryFileDB instanciation)
+Because we want to support multiple types of file. The ``Types`` [Enum](https://docs.python.org/3/library/enum.html) is a class definition that allow to listing, referencing and hinting (var types) the file types that well be used (for example InventoryFileDB instanciation)
 
 To create the file database, we need to provide some configuration like the path in the file system where to put the inventory data and inside a file of which type. Using the ``os`` module, we can validate the existance and write access of the target directory
 
@@ -50,7 +50,7 @@ Saving data to a CSV or a JSON file are technically different operations. Hence,
 The configuration allows us also to resolve the path of the storage file : by concatenating the directory path, the file name defined as class attribut of InventoryFileDB and file extension (csv or json). The resolved path can be communicated as argument to subroutines :``save_csv_products``, ``save_json_products``
 
 ```python
-	...
+    ...
     def save_products(self, products: Iterable[Product]):
         path = os.path.join(self.__dir_path, f"{self.file_name}.{self.__file_type.value}")
 
@@ -58,7 +58,7 @@ The configuration allows us also to resolve the path of the storage file : by co
             self._save_csv_products(path, products)
         else:
             self._save_json_products(path, products)
-	...
+    ...
 ```
 
 ``json`` Python builtin library provide some simple functions to marshell (dump/dumps) and unmarshell (load/loads) Python objects into/from json formated strings
@@ -125,7 +125,7 @@ class Store:
         self.__inventory = []
         self.__items_count = 0
 
-		from storify.db.inventory import InventoryFileDB, Types
+        from storify.db.inventory import InventoryFileDB, Types
         dir_path = os.path.dirname(os.path.abspath(__file__))
         self.__inventory_db = InventoryFileDB(dir_path, Types.JSON)
 
