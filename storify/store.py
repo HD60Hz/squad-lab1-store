@@ -25,7 +25,8 @@ class Store:
         if not data_exist:
             for product in Home24Scraper().retrieve_articles():
                 self._append_inventory(Product(*product))
-                self.save_inventory()
+
+            self.save_inventory()
 
     def add_product(self, name: str, price: float, quantity: int):
         try:
