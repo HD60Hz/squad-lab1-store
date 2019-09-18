@@ -2,6 +2,8 @@ import os
 from collections import namedtuple
 from typing import List
 
+from storify.scraper import Home24Scraper
+
 Product = namedtuple("Product", ["name", "price", "quantity"])
 
 
@@ -13,25 +15,34 @@ class Store:
 
         from storify.db.inventory import InventoryFileDB, Types
         dir_path = os.path.dirname(os.path.abspath(__file__))
-        self.__inventory_db = InventoryFileDB(dir_path, Types.JSON)
+        self.__inventory_db = InventoryFileDB(dir_path, Types.CSV)
 
+        data_exist = False
         for product in self.__inventory_db.load_products():
-            self.__inventory.append(product)
-            self.__items_count += product.quantity
+            data_exist = True
+            self._append_inventory(product)
+
+        if not data_exist:
+            for product in Home24Scraper().retrieve_articles():
+                self._append_inventory(Product(*product))
+                self.save_inventory()
 
     def add_product(self, name: str, price: float, quantity: int):
         try:
             price = float(price)
             quantity = int(quantity)
-            new = Product(name, price, quantity)
-            self.__inventory.append(new)
 
         except ValueError:
             raise ValueError(f'Invalid product input : {name}, {price}, {quantity}')
 
-        self.__items_count += quantity
+        new = Product(name, price, quantity)
+        self._append_inventory(new)
 
         return new
+
+    def _append_inventory(self, product: Product):
+        self.__inventory.append(product)
+        self.__items_count += product.quantity
 
     def remove_product(self, product: Product):
         try:
