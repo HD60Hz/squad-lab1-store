@@ -66,53 +66,57 @@ The configuration allows us also to resolve the path of the storage file : by co
 ``csv`` Python builtin library allows the creation of writers and readers from IO file objects (``open``). The writer can write headers and rows in the targeted CSV file. The reader is an iterable that can load the file rows
 
 ```python
-...
-def _save_csv_products(self, file_path, products: Iterable[Product]):
-    with open(file_path, 'w') as inventory:
-        for product in products:
-            writer = csv.writer(inventory)
-            writer.writerow(product)
+    ...
+    @staticmethod
+    def _save_csv_products(file_path: str, products: Iterable[Product]):
+        with open(file_path, 'w') as inventory:
+            for product in products:
+                writer = csv.writer(inventory)
+                writer.writerow(product)
 
-def _save_json_product(self, file_path, products: Iterable[Product]):
-    with open(file_path, 'w') as inventory:
-        inventory.write(json.dumps(products))
+    @staticmethod
+    def _save_json_products(file_path: str, products: Iterable[Product]):
+        with open(file_path, 'w') as inventory:
+            inventory.write(json.dumps(products))
+    ...
 ...
 ```
 #### Load products
-Independently of the file type configuration, loading product must verify the existance of either a CSV or JSON file then load data from them
-Similarly to saving products, we need to seperate the implementation versions (CSV, JSON) then invoke the appropriate one
+Similarly to saving products, loading product must verify the existance of either a CSV or JSON file based on configuration then load data from them, we need to seperate the implementation versions (CSV, JSON) then invoke the appropriate one
 
 ```python
 ...
-def load_products(self) -> Iterable[Product]:
-    path = os.path.join(self.__dir_path, f"{self.file_name}.{self.__file_type.value}")
+    def load_products(self) -> Iterable[Product]:
+        path = os.path.join(self.__dir_path, f"{self.file_name}.{self.__file_type.value}")
 
-    if not os.path.exists(path):
-        return []
+        if not os.path.exists(path):
+            return []
 
-    if self.__file_type == Types.CSV:
-        return self._load_csv_products(path)
+        if self.__file_type == Types.CSV:
+            return self._load_csv_products(path)
 
-    if self.__file_type == Types.JSON:
-        return self._load_json_products(path)
+        if self.__file_type == Types.JSON:
+            return self._load_json_products(path)
 
-def _load_csv_products(self, file_path: str):
-    with open(file_path, 'r') as inventory:
-        reader = csv.reader(inventory)
-        for product in reader:
-            yield Product(product[0], float(product[1]), int(product[2]))
+    @staticmethod
+    def _load_csv_products(file_path: str):
+        with open(file_path, 'r') as inventory:
+            reader = csv.reader(inventory)
+            for product in reader:
+                yield Product(product[0], float(product[1]), int(product[2]))
 
-def _load_json_products(self, file_path):
-    with open(file_path, 'r') as inventory:
-        products = json.loads(inventory.read())
-        for product in products:
-            yield Product(product[0], float(product[1]), int(product[2]))
+    @staticmethod
+    def _load_json_products(file_path: str):
+        with open(file_path, 'r') as inventory:
+            products = json.loads(inventory.read())
+            for product in products:
+                yield Product(product[0], float(product[1]), int(product[2]))
 ```
 
-``load_products`` returns a generator (kind of iterator) that will yield one product at time and thus save some memory in the case of CSV (JSON require all the file content to have a valid and deserializable string)
+``load_products`` returns a generator (kind of iterator) that will yield one product at time and thus saving some memory in the case of CSV (JSON require loading all file content to have a valid and deserializable string)
 
 ### Persistance of store inventory
-Let's specify a simple workflow for the persistance and loading of the store inventory. We will assume that when a store is created it will automatically load its inventory from the file database. No need for the initial/provided inventory. On the other hand we will assume, and this is for simplicity purposes,  that exiting the RELP with trigger the persistance of all the inventory
+Let's specify a simple workflow for the persistance and loading of the store inventory. We will assume that when a store is created (storify is started) it will automatically load its inventory from the file database. No need for the initial/provided inventory. On the other hand we will assume, and this is for simplicity purposes, that exiting the RELP with trigger the persistance of all the inventory
 
 ```python
 class Store:

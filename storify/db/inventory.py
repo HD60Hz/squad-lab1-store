@@ -33,13 +33,15 @@ class InventoryFileDB:
         else:
             self._save_json_products(path, products)
 
-    def _save_csv_products(self, file_path, products: Iterable[Product]):
+    @staticmethod
+    def _save_csv_products(file_path: str, products: Iterable[Product]):
         with open(file_path, 'w') as inventory:
             for product in products:
                 writer = csv.writer(inventory)
                 writer.writerow(product)
 
-    def _save_json_products(self, file_path, products: Iterable[Product]):
+    @staticmethod
+    def _save_json_products(file_path: str, products: Iterable[Product]):
         with open(file_path, 'w') as inventory:
             inventory.write(json.dumps(products))
 
@@ -55,13 +57,15 @@ class InventoryFileDB:
         if self.__file_type == Types.JSON:
             return self._load_json_products(path)
 
-    def _load_csv_products(self, file_path: str):
+    @staticmethod
+    def _load_csv_products(file_path: str):
         with open(file_path, 'r') as inventory:
             reader = csv.reader(inventory)
             for product in reader:
                 yield Product(product[0], float(product[1]), int(product[2]))
 
-    def _load_json_products(self, file_path):
+    @staticmethod
+    def _load_json_products(file_path: str):
         with open(file_path, 'r') as inventory:
             products = json.loads(inventory.read())
             for product in products:
