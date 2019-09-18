@@ -3,8 +3,10 @@ LAB1 SQUAD TRAINING - PYTHON
 
 ### Scraping
 Till now, we have being focusing only on super motivated eager managers that are ready to spend time managing the inventory product by product. There are a lot of LAZY managers out there that have the need to run their store and have an automatically collected inventory from a remote place. This is just a stupid and naive functionality that we will add to introduce : Scraping the web
+
 Web Scraping is simply the action of extracting data from websites. The 'Web' part of the term reference the use of the World Wide Web and generally its popular protocole : HTTP.
 Scraping can be done manually by a hard working person but normally it refers to the use of an automated process (bot, web crawler) to retrieve data into some kind of database for futur uses (ex: Data analysis)
+
 Unless we want to create a complex and intelligent scraping (crawler-like) system that will automatically analyse different website structures and dynamically search for the targeted informations, the common way of conceptualizing a scraper involve analysing manually the unique and unchanged structure of a single website then code accordingly
 
 The website that will be used for this lab is **Home24**
@@ -16,16 +18,14 @@ Using our debugging tool, analyse the articles section of the page (html)
 ```html
 ...
 <div class="acte-list-view-articles-ctn article-list js-article-list" data-options="...">
-	<div class="topsellers">...</div>
-	<div class="article-list__items row row--with-3-columns">...</div>
+    <div class="topsellers">...</div>
+    <div class="article-list__items row row--with-3-columns">...</div>
 </div>
 ...
 ```
 First we can notice the presence of a ``data-options`` attribute for ``div`` element with all the data related to articles
 This data can be retrieved then parsed to extract some products (name, price ...)
-We are going to take a different route and try to focus on the article tiles. The article section is composed of 2 subsections : ``topsellers`` and ``acticle_list``
-
-Each of those contain multiple ``article_tile`` sections
+We are going to take a different route and try to focus on the article tiles. The article section is composed of 2 subsections : ``topsellers`` and ``acticle_list``. Each of those contain multiple ``article_tile`` sections
 
 ```html
 ...
@@ -65,6 +65,7 @@ We need to extract just 2 informations for each article :
 	*	Helpers for retrying requests and dealing with HTTP redirects.
 	*	Support for gzip and deflate encoding.
 	*	Proxy support for HTTP and SOCKS.
+
 * [requests](https://2.python-requests.org/en/master/) is an elegant and simple HTTP library for Python built on top of urllib3. It is highly recommanded library inside the Python community. This wrapper offers a super easy to use API and extended functionalities compared to the previous libs :
 	*  International Domains and URLs
 	*	Sessions with Cookie Persistence
@@ -76,7 +77,7 @@ We need to extract just 2 informations for each article :
 	...
 
 Obviously we are going to use the ``requests`` library.
-Because it is not a standard one, we have to install it. From our virtual environement, run the command :
+Because it is not a standard one, we have to install it. From our virtual environment, run the command :
 
 ```shell
 pip install requests
@@ -104,7 +105,7 @@ class Home24Scraper:
 
   def retrieve_articles(self):
         response = requests.get(self.url_target)
-	    return response.content
+        return response.content
 
 if __name__ == '__main__':
    print(Home24Scraper().retrieve_articles())
@@ -130,7 +131,7 @@ pip install bs4
 Result:
 > Successfully installed beautifulsoup4-4.8.0 bs4-0.0.1 soupsieve-1.9.3
 
-Our store need product quantities. But the Home24 website does not display them for their articles. We will generate fake and random quantities for each instance. Our LAZY managers won't notice any way
+Our store need product quantities. But the Home24 website does not display them for it articles. We will generate fake and random quantities for each instance. Our LAZY managers won't notice anyway
 
 10 articles is enough
 
@@ -152,7 +153,7 @@ def retrieve_articles(self) -> Iterable[tuple]:
 
     return articles
 ```
-The displayed price for the articles have a special format : <pre>'     300,00   '</pre> that can not be parsed/casted with ``float()``. To solve that we use the builtin regular expression library ``re`` in order to retrieve the price using a pattern (Integer + decimal parts rejoined with ``.`` seperator)
+The displayed price for the articles have a special format : <pre>'     300,00   '</pre> that can not be parsed/casted with ``float()``. To solve that we use the builtin regular expression library ``re`` in order to retrieve the price using a pattern (Integer + decimal parts rejoined with ``.`` seperator)    
 
 Let's check what we retrieved now. Run command
 
@@ -169,42 +170,45 @@ Much better !
 Now, we will use our scraper to populate our store inventory if our inventory database is empty
 
 ```python
+...
 class Store:
     def __init__(self, name: str):
         self.name = name
         self.__inventory = []
         self.__items_count = 0
 
-		from storify.db.inventory import InventoryFileDB, Types
+        from storify.db.inventory import InventoryFileDB, Types
         dir_path = os.path.dirname(os.path.abspath(__file__))
         self.__inventory_db = InventoryFileDB(dir_path, Types.CSV)
 
         data_exist = False
-		for product in self.__inventory_db.load_products():
+        for product in self.__inventory_db.load_products():
             data_exist = True
-			self._append_inventory(product)
+            self._append_inventory(product)
 
         if not data_exist:
-            for product in Home24Scraper().retrieve_articles():
-	            self._append_inventory(Product(*product))
-	            self.save_inventory()
+            for article in Home24Scraper().retrieve_articles():
+                self._append_inventory(Product(*article))
+	        
+            self.save_inventory()
 
-def add_product(self, name: str, price: float, quantity: int):
-    try:
-        price = float(price)
-        quantity = int(quantity)
+    def add_product(self, name: str, price: float, quantity: int):
+        try:
+            price = float(price)
+            quantity = int(quantity)
 
-    except ValueError:
-        raise ValueError(f'Invalid product input : {name}, {price}, {quantity}')
+        except ValueError:
+            raise ValueError(f'Invalid product input : {name}, {price}, {quantity}')
 
-    new = Product(name, price, quantity)
-    self._append_inventory(new)
+        new = Product(name, price, quantity)
+        self._append_inventory(new)
 
-    return new
+        return new
 
-def _append_inventory(self, product: Product):
-    self.__inventory.append(product)
-    self.__items_count += product.quantity
+    def _append_inventory(self, product: Product):
+        self.__inventory.append(product)
+        self.__items_count += product.quantity
+...
 ```
 
 That's it ! Let's remove any inventory file left and run storify
