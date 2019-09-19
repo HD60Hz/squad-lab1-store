@@ -12,14 +12,14 @@ class Store:
         self.__items_count = 0
 
         from storify.db.inventory import InventoryFileDB, Types
-        dir_path = os.path.dirname(os.path.abspath(__file__))
-        self.__inventory_db = InventoryFileDB(dir_path, Types.JSON)
+        self.__inventory_db = InventoryFileDB(Types.JSON)
 
-        for product in self.__inventory_db.load_products():
+        products = self.__inventory_db.load_products() or []
+        for product in products:
             self.__inventory.append(product)
             self.__items_count += product.quantity
 
-    def add_product(self, name: str, price: float, quantity: int):
+    def add_product(self, name: str, price: float, quantity: int) -> Product:
         try:
             price = float(price)
             quantity = int(quantity)

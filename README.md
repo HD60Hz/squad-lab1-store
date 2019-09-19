@@ -19,8 +19,10 @@ storify
 ``inventory.py`` contains database implementation to store an inventory. We will focus on the file implementation for now
 
 ```python
-import os
+from enum import Enum, unique
+from storify import DATA_DIR
 
+@unique
 class Types(Enum):
     CSV = "csv"
     JSON = "json"
@@ -29,19 +31,17 @@ class Types(Enum):
 class InventoryFileDB:
     file_name = "inventory"
 
-  def __init__(self, dir_path: str, file_type: Types = Types.CSV):
+  def __init__(self, file_type: Types = Types.CSV):
         if file_type not in Types:
             raise ValueError("Error: Invalid inventory database file type")
 
-        if not (os.path.isdir(dir_path) and os.access(dir_path, os.W_OK)):
-            raise Exception("Error: Invalid inventory database directory path")
-
-        self.__dir_path = dir_path
+        self.__dir_path = DATA_DIR
         self.__file_type = file_type
 ```
-Because we want to support multiple types of file. The ``Types`` [Enum](https://docs.python.org/3/library/enum.html) is a class definition that allow to listing, referencing and hinting (var types) the file types that well be used (for example InventoryFileDB instanciation)
+Because we want to support multiple types of file. The ``Types`` [Enum](https://docs.python.org/3/library/enum.html) is a class definition that allows the listing, referencing and hinting (var types) of file types that will be used (for example in InventoryFileDB instanciation)
 
-To create the file database, we need to provide some configuration like the path in the file system where to put the inventory data and inside a file of which type. Using the ``os`` module, we can validate the existance and write access of the target directory
+To create the database, we need to provide some configuration like the above mentioned file type 
+We will come back to it later but let's assume the existence of ``DATA_DIR`` that contains the path to the application data directory
 
 For sake of simplicity, we will restrict the api of the database to : ``save_products`` and ``load_products``
 
@@ -49,7 +49,12 @@ For sake of simplicity, we will restrict the api of the database to : ``save_pro
 Saving data to a CSV or a JSON file are technically different operations. Hence, it is a good practice to seperate the implementation version then delegate accordingly based on the configuration (chosen file type)
 The configuration allows us also to resolve the path of the storage file : by concatenating the directory path, the file name defined as class attribut of InventoryFileDB and file extension (csv or json). The resolved path can be communicated as argument to subroutines :``save_csv_products``, ``save_json_products``
 
+`The ``path`` of the ``os`` standard module can help us manage files and directories paths (verifition, access, composition...)  
+In our case we need to construct the path to the file that will contain our data from : directory path, file name and file extension 
+
 ```python
+    ...
+    import os
     ...
     def save_products(self, products: Iterable[Product]):
         path = os.path.join(self.__dir_path, f"{self.file_name}.{self.__file_type.value}")
@@ -66,6 +71,13 @@ The configuration allows us also to resolve the path of the storage file : by co
 ``csv`` Python builtin library allows the creation of writers and readers from IO file objects (``open``). The writer can write headers and rows in the targeted CSV file. The reader is an iterable that can load the file rows
 
 ```python
+    ...
+    import json
+    import csv
+    ...
+    from typing import Iterable
+    ...
+    from storify.store import Product
     ...
     @staticmethod
     def _save_csv_products(file_path: str, products: Iterable[Product]):
@@ -85,12 +97,13 @@ The configuration allows us also to resolve the path of the storage file : by co
 Similarly to saving products, loading product must verify the existance of either a CSV or JSON file based on configuration then load data from them, we need to seperate the implementation versions (CSV, JSON) then invoke the appropriate one
 
 ```python
-...
-    def load_products(self) -> Iterable[Product]:
+    from typing import Iterable, Optional
+    ...
+    def load_products(self) -> Optional[Iterable[Product]]:
         path = os.path.join(self.__dir_path, f"{self.file_name}.{self.__file_type.value}")
 
         if not os.path.exists(path):
-            return []
+            return None
 
         if self.__file_type == Types.CSV:
             return self._load_csv_products(path)
@@ -126,10 +139,10 @@ class Store:
         self.__items_count = 0
 
         from storify.db.inventory import InventoryFileDB, Types
-        dir_path = os.path.dirname(os.path.abspath(__file__))
-        self.__inventory_db = InventoryFileDB(dir_path, Types.JSON)
+        self.__inventory_db = InventoryFileDB(Types.JSON)
 
-        for product in self.__inventory_db.load_products():
+        products = self.__inventory_db.load_products() or []
+        for product in products:
             self.__inventory.append(product)
             self.__items_count += product.quantity
 ```
@@ -158,13 +171,22 @@ def do_exit(self, args):
     return True
 ```
 
-Finally we need to quickly adapt the main function
+Finally we need to quickly adapt the main function...BUT WAIT !
+Remember, we did not yet define the DATA_DIR. We want to create a _data_ directory in root of the project to contain all inputs/outputs of our application  
+Of cource this new directory should not be versioned. So add it to gitignore file
 
 ```python
+from pathlib import Path
+...
+ROOT_DIR = Path(__file__).parents[1]
+DATA_DIR = ROOT_DIR / 'data'
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+
 def main():
     store = Store(name="OPEN Store")
     StoreREPL(store).cmdloop()
 ```
+``pathlib`` is a much elegent library to manage path (than ``os.path``)
 
 Let's test ALL of this now
 * Clear any inventory file (CSV, JSON)
@@ -192,8 +214,7 @@ Process finished with exit code 0
 
 New file created
 <pre>
-storify
-    ├── ...
+data
     ├── inventory.csv
 </pre>
 with content
