@@ -26,6 +26,3 @@ class Home24Scraper:
 
         return articles
 
-
-if __name__ == '__main__':
-    print(Home24Scraper().retrieve_articles())
