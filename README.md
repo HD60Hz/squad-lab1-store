@@ -167,9 +167,10 @@ Result :
 Much better !
 
 #### Populate store inventory
-Now, we will use our scraper to populate our store inventory if our inventory database is empty
+Now, we will use our scraper to populate our store inventory if our inventory database does not exist
 
 ```python
+from storify.scraper import Home24Scraper
 ...
 class Store:
     def __init__(self, name: str):
@@ -178,37 +179,17 @@ class Store:
         self.__items_count = 0
 
         from storify.db.inventory import InventoryFileDB, Types
-        dir_path = os.path.dirname(os.path.abspath(__file__))
-        self.__inventory_db = InventoryFileDB(dir_path, Types.CSV)
+        self.__inventory_db = InventoryFileDB(Types.CSV)
 
-        data_exist = False
-        for product in self.__inventory_db.load_products():
-            data_exist = True
-            self._append_inventory(product)
+        db_data = self.__inventory_db.load_products()
+        products = db_data or (Product(*a) for a in Home24Scraper().retrieve_articles())
+        for product in products:
+            self.__inventory.append(product)
+            self.__items_count += product.quantity
 
-        if not data_exist:
-            for article in Home24Scraper().retrieve_articles():
-                self._append_inventory(Product(*article))
-	        
+        if not db_data:
             self.save_inventory()
-
-    def add_product(self, name: str, price: float, quantity: int):
-        try:
-            price = float(price)
-            quantity = int(quantity)
-
-        except ValueError:
-            raise ValueError(f'Invalid product input : {name}, {price}, {quantity}')
-
-        new = Product(name, price, quantity)
-        self._append_inventory(new)
-
-        return new
-
-    def _append_inventory(self, product: Product):
-        self.__inventory.append(product)
-        self.__items_count += product.quantity
-...
+    ...
 ```
 
 That's it ! Let's remove any inventory file left and run storify
@@ -246,3 +227,55 @@ Meuble TV Molios II,349.99,1
 Desserte Buddina I,159.99,30
 Fauteuil de relaxation Vancouver,199.99,20
 </pre>
+
+#### Dependencies
+Before we finish this chapter, we need to address one last issue  
+We installed some third-party libraries lately and it would bad to reinstall them one by one in an other environment
+
+First, let's list all the dependencies that we have in our ``venv`` by running the command :
+```shell
+pip list
+```
+Result : 
+<pre>
+Package        Version
+-------------- ---------
+beautifulsoup4 4.8.0
+bs4            0.0.1
+certifi        2019.6.16
+chardet        3.0.4
+idna           2.8
+pip            10.0.1
+requests       2.22.0
+soupsieve      1.9.2
+tabulate       0.8.3
+urllib3        1.25.3
+</pre>
+
+To be able to reinstall them, they must be saved in a versioned file. The convention is to use ``requirements.txt`` in root of the project for that  
+This file should content a rows of dependency lines like : ``beautifulsoup4==4.8.0``
+The best way to manage this file is through ``pip`` as shown :
+
+```shell 
+pip freeze > requirements.txt
+```
+Result (requirements.txt content) :
+
+<pre>
+beautifulsoup4==4.8.0
+bs4==0.0.1
+certifi==2019.6.16
+chardet==3.0.4
+idna==2.8
+requests==2.22.0
+soupsieve==1.9.2
+tabulate==0.8.3
+urllib3==1.25.3
+</pre>
+
+Finally to reinstall the dependencies, just run the command :
+
+```shell
+pip install -r requirements.txt
+```
+
