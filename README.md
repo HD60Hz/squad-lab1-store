@@ -22,17 +22,17 @@ Let's start by seperating storify into multiple files :
 └── storify
     ├── __init__.py
     ├── interfaces
-    │   └── repl.py
+    │   └── cli.py
     ├── __main__.py
     └── store.py
 </pre>
 
-Now, Storify is a package containing a subpackage for the interfaces and a store module. We moved ``create_store`` and ``Product`` definitions into ``store``  and kept the rest in ``repl`` module
+Now, Storify is a package containing a subpackage for the interfaces and a store module. We moved ``create_store`` and ``Product`` definitions into ``store``  and kept the rest in ``cli`` module
 
 The ``__init__.py`` is the initialisation file for the storify package. We can use it to define a ``main`` function that creates a store and run it in a REPL
 
 ```python
-from storify.interfaces.repl import run_repl
+from storify.interfaces.cli import run_cli
 from storify.store import create_store, Product
 
 def main():
@@ -43,7 +43,7 @@ def main():
             Product("mouse", 40, 10)
         ]
     )
-    run_repl(store)
+    run_cli(store)
 ```
 Notice the imports statements on top. They use relative paths to modules in the form of : \<package\>.\<subpackage\>..\<module\> to import elements from them. To allow python interpreter to know the location of the packages that you import from, you need to add the location of the root of the project to python path either by ``PYTHONPATH`` environnement variable or ``sys.path``
 
@@ -137,7 +137,7 @@ from cmd import Cmd
 from tabulate import tabulate
 from storify.store import Store
 
-class StoreREPL(Cmd):
+class StoreCLI(Cmd):
     prompt = "<Store>"
 
     def __init__(self, store: Store):
@@ -214,7 +214,7 @@ The modify product use case combines adding new product to the store and removin
 The main function becomes :
 
 ```python
-from storify.interfaces.repl import StoreREPL
+from storify.interfaces.cli import StoreCLI
 from storify.store import Product, Store
 
 def main():
@@ -225,7 +225,7 @@ def main():
             Product("mouse", 40, 10)
         ]
     )
-    StoreREPL(store).cmdloop()
+    StoreCLI(store).cmdloop()
 ```
 
 Run the application now to see if it is working
