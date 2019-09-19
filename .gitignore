@@ -1,5 +1,6 @@
 venv
 env
+jptrenv
 *.pyc
 __pycache__
 .idea
