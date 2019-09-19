@@ -1,4 +1,3 @@
-import os
 from collections import namedtuple
 from typing import List
 
@@ -14,21 +13,18 @@ class Store:
         self.__items_count = 0
 
         from storify.db.inventory import InventoryFileDB, Types
-        dir_path = os.path.dirname(os.path.abspath(__file__))
-        self.__inventory_db = InventoryFileDB(dir_path, Types.CSV)
+        self.__inventory_db = InventoryFileDB(Types.CSV)
 
-        data_exist = False
-        for product in self.__inventory_db.load_products():
-            data_exist = True
-            self._append_inventory(product)
+        db_data = self.__inventory_db.load_products()
+        products = db_data or (Product(*a) for a in Home24Scraper().retrieve_articles())
+        for product in products:
+            self.__inventory.append(product)
+            self.__items_count += product.quantity
 
-        if not data_exist:
-            for product in Home24Scraper().retrieve_articles():
-                self._append_inventory(Product(*product))
-
+        if not db_data:
             self.save_inventory()
 
-    def add_product(self, name: str, price: float, quantity: int):
+    def add_product(self, name: str, price: float, quantity: int) -> Product:
         try:
             price = float(price)
             quantity = int(quantity)
@@ -37,13 +33,10 @@ class Store:
             raise ValueError(f'Invalid product input : {name}, {price}, {quantity}')
 
         new = Product(name, price, quantity)
-        self._append_inventory(new)
+        self.__inventory.append(new)
+        self.__items_count += new.quantity
 
         return new
-
-    def _append_inventory(self, product: Product):
-        self.__inventory.append(product)
-        self.__items_count += product.quantity
 
     def remove_product(self, product: Product):
         try:

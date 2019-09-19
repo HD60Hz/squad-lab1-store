@@ -65,6 +65,7 @@ We need to extract just 2 informations for each article :
 	*	Helpers for retrying requests and dealing with HTTP redirects.
 	*	Support for gzip and deflate encoding.
 	*	Proxy support for HTTP and SOCKS.
+	
 * [requests](https://2.python-requests.org/en/master/) is an elegant and simple HTTP library for Python built on top of urllib3. It is highly recommanded library inside the Python community. This wrapper offers a super easy to use API and extended functionalities compared to the previous libs :
 	*  International Domains and URLs
 	*	Sessions with Cookie Persistence

@@ -1,12 +1,14 @@
 import csv
 import json
 import os
-from enum import Enum
-from typing import Iterable
+from enum import Enum, unique
+from typing import Iterable, Optional
 
+from storify import DATA_DIR
 from storify.store import Product
 
 
+@unique
 class Types(Enum):
     CSV = "csv"
     JSON = "json"
@@ -15,14 +17,11 @@ class Types(Enum):
 class InventoryFileDB:
     file_name = "inventory"
 
-    def __init__(self, dir_path: str, file_type: Types = Types.CSV):
+    def __init__(self, file_type: Types = Types.CSV):
         if file_type not in Types:
             raise ValueError("Error: Invalid inventory database file type")
 
-        if not (os.path.isdir(dir_path) and os.access(dir_path, os.W_OK)):
-            raise Exception("Error: Invalid inventory database directory path")
-
-        self.__dir_path = dir_path
+        self.__dir_path = DATA_DIR
         self.__file_type = file_type
 
     def save_products(self, products: Iterable[Product]):
@@ -45,11 +44,11 @@ class InventoryFileDB:
         with open(file_path, 'w') as inventory:
             inventory.write(json.dumps(products))
 
-    def load_products(self) -> Iterable[Product]:
+    def load_products(self) -> Optional[Iterable[Product]]:
         path = os.path.join(self.__dir_path, f"{self.file_name}.{self.__file_type.value}")
 
         if not os.path.exists(path):
-            return []
+            return None
 
         if self.__file_type == Types.CSV:
             return self._load_csv_products(path)
