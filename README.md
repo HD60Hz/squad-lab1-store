@@ -167,7 +167,7 @@ Result :
 Much better !
 
 #### Populate store inventory
-Now, we will use our scraper to populate our store inventory if our inventory database is empty
+Now, we will use our scraper to populate our store inventory if our inventory database does not exist
 
 ```python
 from storify.scraper import Home24Scraper
