@@ -1,7 +1,12 @@
 from collections import namedtuple
+from concurrent.futures.thread import ThreadPoolExecutor
+from functools import partial
+from threading import Lock
 from typing import List
 
-from storify.scraper import Home24Scraper
+from apscheduler.schedulers.background import BackgroundScheduler
+
+from storify.scraper import Home24Scraper, Home24Categories
 
 Product = namedtuple("Product", ["name", "price", "quantity"])
 
@@ -11,18 +16,39 @@ class Store:
         self.name = name
         self.__inventory = []
         self.__items_count = 0
+        self.__scheduler = None
 
         from storify.db.inventory import InventoryFileDB, Types
         self.__inventory_db = InventoryFileDB(Types.CSV)
 
         db_data = self.__inventory_db.load_products()
-        products = db_data or (Product(*a) for a in Home24Scraper().retrieve_articles())
-        for product in products:
-            self.__inventory.append(product)
-            self.__items_count += product.quantity
+        if db_data:
+            for product in db_data:
+                self.add_product(*product)
+        else:
+            def push_from_home24(store: Store, lock, category: Home24Categories):
+                print(f"Retrieving from Home24 : {category.name} ...")
+                articles = Home24Scraper(category).retrieve_articles()
+                for article in articles:
+                    with lock:
+                        store.add_product(*article)
 
-        if not db_data:
-            self.save_inventory()
+                with lock:
+                    store.save_inventory()
+
+            lck = Lock()
+            executor = ThreadPoolExecutor(max_workers=3)
+            executor.map(partial(push_from_home24, self, lck), Home24Categories)
+
+        self._register_autosave()
+
+    def _register_autosave(self):
+        self.__scheduler = BackgroundScheduler()
+        self.__scheduler.add_job(self.save_inventory, 'interval', seconds=10)
+        self.__scheduler.start()
+
+    def close(self):
+        self.__scheduler.shutdown()
 
     def add_product(self, name: str, price: float, quantity: int) -> Product:
         try:
