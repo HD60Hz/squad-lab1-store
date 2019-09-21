@@ -1,176 +1,79 @@
 LAB1 SQUAD TRAINING - PYTHON
 ---
 
-### Scraping
-Till now, we have being focusing only on super motivated eager managers that are ready to spend time managing the inventory product by product. There are a lot of LAZY managers out there that have the need to run their store and have an automatically collected inventory from a remote place. This is just a stupid and naive functionality that we will add to introduce : Scraping the web
-
-Web Scraping is simply the action of extracting data from websites. The 'Web' part of the term reference the use of the World Wide Web and generally its popular protocole : HTTP.
-Scraping can be done manually by a hard working person but normally it refers to the use of an automated process (bot, web crawler) to retrieve data into some kind of database for futur uses (ex: Data analysis)
-
-Unless we want to create a complex and intelligent scraping (crawler-like) system that will automatically analyse different website structures and dynamically search for the targeted informations, the common way of conceptualizing a scraper involve analysing manually the unique and unchanged structure of a single website then code accordingly
-
-The website that will be used for this lab is **Home24**
-
-#### Home24 structure
-Let's open the e-commerce website ``home24.fr`` to the furniture category : [https://www.home24.fr/categorie/meubles/](https://www.home24.fr/categorie/meubles/)
-Using our debugging tool, analyse the articles section of the page (html)
-
-```html
-...
-<div class="acte-list-view-articles-ctn article-list js-article-list" data-options="...">
-    <div class="topsellers">...</div>
-    <div class="article-list__items row row--with-3-columns">...</div>
-</div>
-...
-```
-First we can notice the presence of a ``data-options`` attribute for ``div`` element with all the data related to articles
-This data can be retrieved then parsed to extract some products (name, price ...)
-We are going to take a different route and try to focus on the article tiles. The article section is composed of 2 subsections : ``topsellers`` and ``acticle_list``. Each of those contain multiple ``article_tile`` sections
-
-```html
-...
-<div class="article-tile js-article-tile acte-article-wrapper" data-gtm-bind="click,appear"
-  data-sku="000000001000008808" data-gtm-binded="true">						   		 		      <div class="article-tile__wrap">
- <div class="article-tile__images">... </div>
-
- <a href="/article/meuble-tv-atelier-ii-acacia-partiellement-massif-lava-979486"
-  class="article-tile__link js-article-tile__link acte-article-catalogName-lnk">
-  Meuble TV Atelier II </a>
-
- <div class="article-tile__name">Meuble TV Atelier II</div>
-
- <div class="article__price-wrap ">
- <span class="article__price "> 649,99 €    </span>
- </div>
- <div class="article-tile__rating">...</div>
-  ...
-    </div>
-
- <div class="article-tile__related">...</div>
-</div>
-...
-```
-We need to extract just 2 informations for each article :
-* Product name present in the ``article-tile__name`` div element
-* Product price present in the ``article__price`` div element
-
-#### HTTP request Tool
-* [urllib](https://docs.python.org/3.1/library/urllib.request.html#module-urllib.request) is a module built into the Python standard library and uses [http.client](https://docs.python.org/3.1/library/http.client.html) which implements the client side of HTTP and HTTPS protocols.
-
-* [urllib3](https://urllib3.readthedocs.io/en/latest/) is a powerful, _sanity-friendly_, third-party HTTP client library. urllib3 brings many critical features that are missing from the Python standard libraries :
-	*	Thread safety.
-	*	Connection pooling.
-	*	Client-side SSL/TLS verification.
-	*	File uploads with multipart encoding.
-	*	Helpers for retrying requests and dealing with HTTP redirects.
-	*	Support for gzip and deflate encoding.
-	*	Proxy support for HTTP and SOCKS.
-	
-* [requests](https://2.python-requests.org/en/master/) is an elegant and simple HTTP library for Python built on top of urllib3. It is highly recommanded library inside the Python community. This wrapper offers a super easy to use API and extended functionalities compared to the previous libs :
-	*  International Domains and URLs
-	*	Sessions with Cookie Persistence
-	*	Browser-style SSL Verification
-	*	Elegant Key/Value Cookies
-	*	Automatic Decompression
-	*	Unicode Response Bodies
-	*	Streaming Uploads and Multiple Multipart Files Uploads
-	...
-
-Obviously we are going to use the ``requests`` library.
-Because it is not a standard one, we have to install it. From our virtual environment, run the command :
-
-```shell
-pip install requests
-```
-Result:
-
-> Successfully installed certifi-2019.9.11 chardet-3.0.4 idna-2.8 requests-2.22.0 urllib3-1.25.3
-
-### Home24 Scraper
-Let's create a ``scraper`` module along side the ``store`` module
-<pre>
-.
-├── ...
-├── scraper.py
-└── store.py
-</pre>
-
-We then need to define the ``Home24Scraper``
+### Concurrency
+Until now all the execution parts of the application are sequential. When a codes take longer to execute, because of long processing or some IO related stuff, the rest of the app need to wait till the end even though it does not depend on it  
+To have a closer look at that, we will try to add a sleep in the ``retrieve_articles`` of the scraper for each article (ex: sleep for 4 seconds)
 
 ```python
-import requests
+import time
+...
+    def retrieve_articles(self) -> Iterable[tuple]:
+        response = requests.get(self.__category.value)
+        soup = BeautifulSoup(response.content, 'html.parser')
 
-class Home24Scraper:
-    url_target = 'https://www.home24.fr/categorie/meubles/'
+        tiles = soup.select('.article-tile')
+        
+        articles = []
+        for tile in tiles[:10]:
+            name = str(tile.select_one('.article-tile__name').next)
+            raw_price = str(tile.select_one('.article__price').next)
+            price = float(next(re.finditer(r'\d*,\d{2}', raw_price))[0].replace(',', '.'))
+            quantity = random.randint(0, 50)
 
-    def retrieve_articles(self):
-        response = requests.get(self.url_target)
-        return response.content
+            time.sleep(4)
 
-if __name__ == '__main__':
-   print(Home24Scraper().retrieve_articles())
+            articles.append((name, price, quantity))
+        
+        return articles
+...
 ```
 
-Let's run the module to see what we get as result. Run command
+If we remove the inventory database to trigger the scraping then run _storify_, we will notice a big freeze. It is because the REPL is not yet looping  
+The scraping starts when the store initializes. So everything is blocked till the retrieval of all Home24 articles is finished
 
-```shell
-python storify/scraper.py
-```
-OH!! We get all the html page content as bytes. it is not exploitabled as is. We need to parse it
+An analogy to this situation would be :  
+Imagine we have a store with an inventory room and a backdoor where our provider can park his truck
+* Actually, we work alone. So we need to unload the products and store them in the inventory room. Then, and only then we can open our store and start selling ... sucks doesnt it ?!  
+* Imagine we have a super slow computer to manage our store. So we start working on the computer and every time it freezes for a couple of minutes, we cease the occasion to go and unload a couple of products to the inventory then come back. **THAT IS MULTITASKING**
+* Now Imagine that we hire an employee to do the work of unloading for us. We can start selling products while the employee is working. Of course the inventory will be empty in the beginning and get filled little by little but it wont block us. **THAT IS PARALLELISM**
 
-#### Beautiful Soup 4
-[BS4](http://www.crummy.com/software/BeautifulSoup/) is a Python library for parsing and pulling data out of HTML and XML files. It provides ways to navigate, search, and modify the parse tree (soup)
+**Concurrency** is a broader term that englobes both multitasking and parallelism
 
-We will create a soup out of the response content, then search for the article tiles and finish by extracting names and prices
+In Python to achieve multitasking, we can either use :
+* Thread for preemptive multitasking (Limited by the [GIL](https://wiki.python.org/moin/GlobalInterpreterLock) in the case of CPython)
+* Asynchronous IO (ex: using asyncio) for cooperative multitasking
 
-Don't forget to install ``bs4`` first. Run command
+On the other hand to achieve real parallelism, we have to use ``multiprocessing``  
+[Here](https://realpython.com/python-concurrency/) is a good introduction all those concepts
 
-```shell
-pip install bs4
-```
-Result:
-> Successfully installed beautifulsoup4-4.8.0 bs4-0.0.1 soupsieve-1.9.3
+Let's improve our application using multitasking, show an example with multiprocessing then finish the chapter with some scheduling to save our inventory to the database
 
-Our store need product quantities. But the Home24 website does not display them for it articles. We will generate fake and random quantities for each instance. Our LAZY managers won't notice anyway
-
-10 articles is enough
+#### Adaptation
+To prepare a little bit our existing code, we will change the return type of ``retrieve_articles`` from list to generator (Both iterables so it wont be a problem)
 
 ```python
-def retrieve_articles(self) -> Iterable[tuple]:
-    response = requests.get(self.url_target)
-    soup = BeautifulSoup(response.content, 'html.parser')
+...
+    def retrieve_articles(self) -> Iterable[tuple]:
+        response = requests.get(self.__category.value)
+        soup = BeautifulSoup(response.content, 'html.parser')
 
-    tiles = soup.select('.article-tile')
+        tiles = soup.select('.article-tile')
 
-    articles = []
-    for tile in tiles[:10]:
-        name = str(tile.select_one('.article-tile__name').next)
-        raw_price = str(tile.select_one('.article__price').next)
-        price = float(next(re.finditer(r'\d*,\d{2}', raw_price))[0].replace(',', '.'))
-        quantity = random.randint(0, 50)
+        for tile in tiles[:10]:
+            name = str(tile.select_one('.article-tile__name').next)
+            raw_price = str(tile.select_one('.article__price').next)
+            price = float(next(re.finditer(r'\d*,\d{2}', raw_price))[0].replace(',', '.'))
+            quantity = random.randint(0, 50)
 
-        articles.append((name, price, quantity))
+            time.sleep(4)
 
-    return articles
+            yield name, price, quantity
 ```
-The displayed price for the articles have a special format : <pre>'     300,00   '</pre> that can not be parsed/casted with ``float()``. To solve that we use the builtin regular expression library ``re`` in order to retrieve the price using a pattern (Integer + decimal parts rejoined with ``.`` seperator)    
 
-Let's check what we retrieved now. Run command
-
-```shell
-python storify/scraper.py
-```
-Result :
-
-> [('Matelas confort Premium Smood', 299.99, 21), ('Lit boxspring Kinx', 879.99, 4), ('Canapé convertible Latina', 399.99, 17), ('Meuble TV Atelier II', 649.99, 14), ('Meuble bas Manchester I', 449.99, 9), ('Meuble bas Manchester II', 599.99, 21), ('Chaises de bar Aledas II (lot de 2)', 139.99, 17), ('Meuble TV Molios II', 349.99, 38), ('Desserte Buddina I', 159.99, 47), ('Fauteuil de relaxation Vancouver', 199.99, 28)]
-
-Much better !
-
-#### Populate store inventory
-Now, we will use our scraper to populate our store inventory if our inventory database does not exist
+Next, in the store initialization, we will encapsulate the code related to scraping and saving to inventory database
 
 ```python
-from storify.scraper import Home24Scraper
 ...
 class Store:
     def __init__(self, name: str):
@@ -182,100 +85,306 @@ class Store:
         self.__inventory_db = InventoryFileDB(Types.CSV)
 
         db_data = self.__inventory_db.load_products()
-        products = db_data or (Product(*a) for a in Home24Scraper().retrieve_articles())
-        for product in products:
-            self.__inventory.append(product)
-            self.__items_count += product.quantity
+        if db_data:
+            for product in db_data:
+                self.add_product(*product)
+        else:
+            def push_from_home24(store: Store):
+                articles = Home24Scraper().retrieve_articles()
+                for article in articles:
+                    store.add_product(*article)
 
-        if not db_data:
-            self.save_inventory()
-    ...
+                store.save_inventory()
+
+            push_from_home24(self)
+```
+Now the action of pushing to the inventory uses the store api   
+Most importantly, ``push_from_home24`` is decoupled from the rest of the initialization and it expects a store as argument. When there is no data in our base, we fall back to it
+
+All this will help us on the introduction of Thread next
+
+#### Thread
+The use of a [Thread](https://docs.python.org/3/library/threading.html) is straight forward : Instantiate one and start it with a target and its arguments. In our case it is ``push_to_home24``
+
+```python
+...
+class Store:
+    def __init__(self, name: str):
+        self.name = name
+        self.__inventory = []
+        self.__items_count = 0
+
+        from storify.db.inventory import InventoryFileDB, Types
+        self.__inventory_db = InventoryFileDB(Types.CSV)
+
+        db_data = self.__inventory_db.load_products()
+        if db_data:
+            for product in db_data:
+                self.add_product(*product)
+        else:
+            def push_from_home24(store: Store):
+                articles = Home24Scraper().retrieve_articles()
+                for article in articles:
+                    store.add_product(*article)
+
+                store.save_inventory()
+
+            task = Thread(target=push_from_home24, args,(self,))
+            task.start()
 ```
 
-That's it ! Let's remove any inventory file left and run storify
+Let's test it. Remove the inventory database and run storify
+
+YAY!! No freeze  
+Go ahead and run list_inventory multiple times
 
 <pre>
 Welcome to OPEN Store store. Type help or ? to list commands.
 
 Store>list_inventory
-    name                                   price    quantity
---  -----------------------------------  -------  ----------
- 0  Matelas confort Premium Smood         299.99          14
- 1  Lit boxspring Kinx                    879.99          35
- 2  Canapé convertible Latina             399.99           8
- 3  Meuble TV Atelier II                  649.99          50
- 4  Meuble bas Manchester I               449.99          43
- 5  Meuble bas Manchester II              599.99          14
- 6  Chaises de bar Aledas II (lot de 2)   139.99          20
- 7  Meuble TV Molios II                   349.99           1
- 8  Desserte Buddina I                    159.99          30
- 9  Fauteuil de relaxation Vancouver      199.99          20
+
+Store>list_inventory
+
+Store>list_inventory
+
+Store>list_inventory
+    name                  price    quantity
+--  ------------------  -------  ----------
+ 0  Lit boxspring Kinx   879.99           3
+Store>list_inventory
+    name                  price    quantity
+--  ------------------  -------  ----------
+ 0  Lit boxspring Kinx   879.99           3
+Store>list_inventory
+    name                  price    quantity
+--  ------------------  -------  ----------
+ 0  Lit boxspring Kinx   879.99           3
+Store>list_inventory
+    name                  price    quantity
+--  ------------------  -------  ----------
+ 0  Lit boxspring Kinx   879.99           3
+Store>list_inventory
+    name                         price    quantity
+--  -------------------------  -------  ----------
+ 0  Lit boxspring Kinx          879.99           3
+ 1  Canapé convertible Latina   399.99          49
 Store>
+...
 </pre>
 
-The inventory is saved after scraping and we get an inventory file
+As you can see the inventory is filling up without blocking our management of the store throught the REPL
 
-<pre>
-Matelas confort Premium Smood,299.99,14
-Lit boxspring Kinx,879.99,35
-Canapé convertible Latina,399.99,8
-Meuble TV Atelier II,649.99,50
-Meuble bas Manchester I,449.99,43
-Meuble bas Manchester II,599.99,14
-Chaises de bar Aledas II (lot de 2),139.99,20
-Meuble TV Molios II,349.99,1
-Desserte Buddina I,159.99,30
-Fauteuil de relaxation Vancouver,199.99,20
-</pre>
+Let's step up our game and scrap multiple pages of Home24. We will add _Garden_ and _Light_ categories pages  
+First we will define a ``Home24Categories`` Enum with the targeted URLs
 
-#### Dependencies
-Before we finish this chapter, we need to address one last issue  
-We installed some third-party libraries lately and it would bad to reinstall them one by one in an other environment
+```python
+from enum import Enum
+...
+class Home24Categories(Enum):
+    MEUBLE = 'https://www.home24.fr/categorie/meubles/'
+    JARDIN = 'https://www.home24.fr/categorie/jardin/'
+    LUMINAIRE = 'https://www.home24.fr/categorie/luminaires/'
 
-First, let's list all the dependencies that we have in our ``venv`` by running the command :
-```shell
-pip list
+class Home24Scraper:
+    def __init__(self, category: Home24Categories):
+        self.__category = category
+...
 ```
-Result : 
-<pre>
-Package        Version
--------------- ---------
-beautifulsoup4 4.8.0
-bs4            0.0.1
-certifi        2019.6.16
-chardet        3.0.4
-idna           2.8
-pip            10.0.1
-requests       2.22.0
-soupsieve      1.9.2
-tabulate       0.8.3
-urllib3        1.25.3
-</pre>
 
-To be able to reinstall them, they must be saved in a versioned file. The convention is to use ``requirements.txt`` in root of the project for that  
-This file should content a rows of dependency lines like : ``beautifulsoup4==4.8.0``
-The best way to manage this file is through ``pip`` as shown :
+Now we can call 1 thread for each categorie and start them
 
-```shell 
+```python
+    ...
+    if not db_data:
+        task_meuble = Thread(target=push_from_home24, args=(self, Home24Categories.MEUBLE))
+        task_jardin = Thread(target=push_from_home24, args=(self, Home24Categories.JARDIN))
+        task_luminaire = Thread(target=push_from_home24, args=(self, Home24Categories.LUMINAIRE))
+        task_meuble.start()
+        task_jardin.start()
+        task_luminaire.start()
+...
+```
+
+Great, we are overlapping the task (multitasking) so that when one task is sleeping (4 sec) an other task is run
+
+Now imagine we have 1000 website to scrap. It would be somewhat costly and inefficient to create a Thread for each task. We have to create a ``Pool`` of threads
+
+``ThreadPoolExecutor`` is sweet wrapper to hide the complexity of managing multiple Thread. It is offered by the standard library ``concurrent.futures``
+```python
+from concurrent.futures.thread import ThreadPoolExecutor
+...
+    ...
+    if not db_data:
+        executor = ThreadPoolExecutor(max_workers=3)
+        executor.submit(push_from_home24, self, Home24Categories.MEUBLE)
+        executor.submit(push_from_home24, self, Home24Categories.JARDIN)
+        executor.submit(push_from_home24, self, Home24Categories.LUMINAIRE)
+...
+```
+In this example we create 3 worker to handle 3 tasks. But it does not have to be the case  
+In real world application you need to benchmark you application to find the sweet spot between the number of thread and the task in hand
+
+In functional style it would be...
+
+```python
+from functools import partial
+...
+    ...
+    if not db_data:
+        executor = ThreadPoolExecutor(max_workers=3)
+        executor.map(partial(push_from_home24, self), Home24Categories)
+    ...
+```
+
+Unlike processes that have their own memory space, Threads share their parent process memory. This means that you have to be extra careful about Thread-safety  
+If some tasks involve manipulating/referencing the same data, you have to use some mechanism (Locks, conditions...) to make you code thread-safe
+
+In our case the ``items_count`` is incremented by the product quantity. So we can have a race condition if there is a preemptive interruption from the os  
+Let's use a _Lock_
+
+```python
+from threading import Lock
+    ...
+    def push_from_home24(store: Store, lock: Lock, category: Home24Categories):
+        articles = Home24Scraper(category).retrieve_articles()
+        for article in articles:
+            with lock:
+                store.add_product(*article)
+
+        with lock:
+            store.save_inventory()
+
+    if not db_data:
+        l = Lock()
+        executor = ThreadPoolExecutor(max_workers=3)
+        executor.map(partial(push_from_home24, self, l), Home24Categories)
+...
+```
+
+#### Process
+[Multiprocessing](https://docs.python.org/3/library/multiprocessing.html) in Python have the same API as threading (seen above). But because each process has its own memory space, it is more complex to manage shared data in our program. The solution must involve some kind of inter-process communication (IPC)  
+In our case, because of the shared _inventory_ and _items_count_, it would be difficult to find AS a simple and elegent solution AS using threads
+
+This is how it would look like if we want to force the use of a pool of processes and a manager
+
+```python
+from concurrent.futures.process import ProcessPoolExecutor
+from functools import partial
+from multiprocessing import Manager
+from multiprocessing.managers import BaseManager, NamespaceProxy
+...
+from storify.scraper import Home24Scraper, Home24Categories
+from storify.store import Store, push_from_home24
+
+class StoreManager(BaseManager): pass
+
+class StoreProxy(NamespaceProxy):
+    _exposed_ = ('__getattribute__', '__setattr__', '__delattr__', 'inventory', 'add_product', 'save_inventory')
+
+    def add_product(self, name, price, quantity):
+        callmethod = object.__getattribute__(self, '_callmethod')
+        return callmethod('add_product', [name, price, quantity])
+
+    def save_inventory(self):
+        callmethod = object.__getattribute__(self, '_callmethod')
+        return callmethod('save_inventory')
+
+def create_managed_store(name) -> Store:
+    manager = StoreManager()
+    manager.register("Store", Store, StoreProxy)
+    manager.start()
+
+    return manager.Store(name)
+
+def fill_store(s: Store):
+    lck = Manager().Lock()
+    executor = ProcessPoolExecutor(max_workers=3)
+    executor.map(partial(push_from_home24, s, lck), Home24Categories)
+
+
+def main():
+    store = create_managed_store(name="OPEN Store")
+    if len(store.inventory) == 0:
+        fill_store(store)
+
+    StoreREPL(store).cmdloop()
+```
+
+#### Scheduler
+Imagine we want to schedule some task to be executed periodically or at a certain time. For example, we need to schedule an event for saving the store inventory every 10 seconds  
+
+There are many libraries in Python to handle scheduling
+* ``sched`` is a simple standard library that offers basic scheduling functionality 
+* ``schedule`` is a third-party library alternative with a fluent API (DSL)
+* ``APScheduler`` is a powerful and complete third-party library with support for concurrency and job storages
+
+First, let's try writing our own implementation with a simple loop and a ``time.sleep``. To avoid blocking we will use a thread
+
+```python
+from threading import Thread
+import time
+...
+class Store:
+    def __init__(self, name: str):
+        self.name = name
+        self.__inventory = []
+        self.__items_count = 0
+        self.__autosave = False
+        ...
+        ...
+        self._register_autosave()
+
+    def _register_autosave(self):
+        self.__autosave = True
+        class SchedulerSaveThread(Thread):
+            @classmethod
+            def run(cls):
+                while self.__autosave:
+                    time.sleep(10)
+                    self.save_inventory()
+
+        SchedulerSaveThread().start()
+
+    def close(self):
+        self.__autosave = False
+```
+
+To allow our program to finish we have to stop the Thread from the inside. In this case by setting ``autosave`` to False  
+
+```python
+...
+def main():
+    store = Store(name="OPEN store")
+    StoreREPL(store).cmdloop()
+    store.close()
+```
+
+Now run storify and keep an eye on the inventory file ... For certainty, add a ``print`` inside ``save_inventory``  
+YEP! it is executing the save every 10 seconds without blocking us
+
+Let's try _APScheduler_ this time. Begin by installing it
+
+```shell
+pip install apscheduler
+```
+
+```python
+from apscheduler.schedulers.background import BackgroundScheduler
+...
+    def _register_autosave(self):
+        self.__scheduler = BackgroundScheduler()
+        self.__scheduler.add_job(self.save_inventory, 'interval', seconds=10)
+        self.__scheduler.start()
+
+    def close(self):
+        self.__scheduler.shutdown()
+```
+
+As simple as that !
+
+We added APScheduler to our dependencies to forget to add it to ``requirements.txt``  
+
+```shell
 pip freeze > requirements.txt
-```
-Result (requirements.txt content) :
-
-<pre>
-beautifulsoup4==4.8.0
-bs4==0.0.1
-certifi==2019.6.16
-chardet==3.0.4
-idna==2.8
-requests==2.22.0
-soupsieve==1.9.2
-tabulate==0.8.3
-urllib3==1.25.3
-</pre>
-
-Finally to reinstall the dependencies, just run the command :
-
-```shell
-pip install -r requirements.txt
 ```
 
