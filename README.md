@@ -382,7 +382,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 As simple as that !
 
-We added APScheduler to our dependencies to forget to add it to ``requirements.txt``  
+We added APScheduler to our dependencies, don't forget to add it to ``requirements.txt``  
 
 ```shell
 pip freeze > requirements.txt
