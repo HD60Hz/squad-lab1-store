@@ -35,9 +35,8 @@ class InventoryFileDB:
     @staticmethod
     def _save_csv_products(file_path: str, products: Iterable[Product]):
         with open(file_path, 'w') as inventory:
-            for product in products:
-                writer = csv.writer(inventory)
-                writer.writerow(product)
+            writer = csv.writer(inventory)
+            writer.writerows(products)
 
     @staticmethod
     def _save_json_products(file_path: str, products: Iterable[Product]):
@@ -61,11 +60,11 @@ class InventoryFileDB:
         with open(file_path, 'r') as inventory:
             reader = csv.reader(inventory)
             for product in reader:
-                yield Product(product[0], float(product[1]), int(product[2]))
+                yield Product(int(product[0]), product[1], float(product[2]), int(product[3]))
 
     @staticmethod
     def _load_json_products(file_path: str):
         with open(file_path, 'r') as inventory:
             products = json.loads(inventory.read())
             for product in products:
-                yield Product(product[0], float(product[1]), int(product[2]))
+                yield Product(int(product[0]), product[1], float(product[2]), int(product[3]))
