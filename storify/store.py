@@ -52,7 +52,8 @@ class Store:
         self.__scheduler.start()
 
     def close(self):
-        self.__scheduler.shutdown()
+        if self.__scheduler:
+            self.__scheduler.shutdown()
 
     def _index_in_inventory(self, product: Product):
         self.__inventory[product.id] = product
