@@ -2,7 +2,7 @@ from cmd import Cmd
 
 from tabulate import tabulate
 
-from storify.store import Store
+from storify.store import Store, OutOfStockException
 
 
 class StoreREPL(Cmd):
@@ -135,7 +135,7 @@ class CustomerREPL(Cmd):
                 print(f'{purchase.name} {purchase.price} x {purchase.quantity}')
 
             print(f'Total: {total}')
-        except Exception as e:
+        except (ValueError, OutOfStockException) as e:
             print(e)
 
     def do_exit(self, args):
