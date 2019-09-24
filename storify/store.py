@@ -25,6 +25,9 @@ class Store:
         from storify.db.inventory import InventoryFileDB, Types
         self.__inventory_db = InventoryFileDB(Types.CSV)
 
+        from storify.printer import InvoicePrinter
+        self.__invoice_printer = InvoicePrinter(self.name)
+
         db_data = self.__inventory_db.load_products()
         if db_data:
             for product in db_data:
@@ -126,6 +129,8 @@ class Store:
             purchases.append(Purchase(product.name, product.price, quantity))
 
         self.__checked_carts.append(cart)
+
+        self.__invoice_printer.print(purchases, total)
 
         return purchases, total
 
