@@ -115,7 +115,7 @@ class Store:
         uow = []
         for product, quantity in cart.content:
             if product.quantity < quantity:
-                raise Exception(f'{product!r} out of stock')
+                raise OutOfStockException(product)
 
             uow.append((product, quantity))
 
@@ -167,3 +167,11 @@ class Cart:
     @property
     def content(self) -> Iterable[Tuple[Product, int]]:
         return ((self.__inventory[id], quantity) for id, quantity in self.__products.items())
+
+
+class OutOfStockException(Exception):
+    def __init__(self, product):
+        self.product = product
+
+    def __str__(self):
+        return f'{self.product!r} out of stock'
