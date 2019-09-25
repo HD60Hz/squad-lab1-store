@@ -1,45 +1,52 @@
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>Invoice</title>
-	</head>
-	<body>
-		<article style="width:800px; margin:0 auto;">
-			<h1>{{ title }}</h1>
-			<table class="meta">
-				<tr>
-					<th><span contenteditable>Invoice #</span></th>
-					<td><span contenteditable>{{ id }}</span></td>
-				</tr>
-				<tr>
-					<th><span contenteditable>Date</span></th>
-					<td><span contenteditable>{{ today }}</span></td>
-				</tr>
-				<tr>
-					<th><span contenteditable>Amount Due</span></th>
-					<td><span id="prefix" contenteditable>$</span><span>{{ total }}</span></td>
-				</tr>
-			</table>
-			<table class="purchases">
-				<thead>
-					<tr>
-						<th><span contenteditable>Item</span></th>
-						<th><span contenteditable>Rate</span></th>
-						<th><span contenteditable>Quantity</span></th>
-						<th><span contenteditable>Price</span></th>
-					</tr>
-				</thead>
-				<tbody>
-					{{ items }}
-				</tbody>
-			</table>
-			<a class="add">+</a>
-			<table class="balance">
-				<tr>
-					<th><span contenteditable>Total</span></th>
-					<td><span data-prefix>$</span><span>{{ total }}</span></td>
-				</tr>
-			</table>
-		</article>
-	</body>
+<head>
+    <meta charset="utf-8">
+    <title>Invoice</title>
+</head>
+<body>
+<article>
+    <h1>{{ title }}</h1>
+    <table class="meta">
+        <tr>
+            <th><span contenteditable>Invoice #</span></th>
+            <td><span contenteditable>{{ id }}</span></td>
+        </tr>
+        <tr>
+            <th><span contenteditable>Date</span></th>
+            <td><span contenteditable>{{ today }}</span></td>
+        </tr>
+        <tr>
+            <th><span contenteditable>Amount Due</span></th>
+            <td><span id="prefix" contenteditable>$</span><span>{{ total }}</span></td>
+        </tr>
+    </table>
+    <table class="purchases">
+        <thead>
+        <tr>
+            <th><span contenteditable>Item</span></th>
+            <th><span contenteditable>Rate</span></th>
+            <th><span contenteditable>Quantity</span></th>
+            <th><span contenteditable>Price</span></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for purchase in purchases %}
+        <tr>
+            <td><a class="cut">-</a><span contenteditable>{{ purchase['name'] }}</span></td>
+            <td><span data-prefix>$</span><span contenteditable>{{ purchase['rate'] }}</span></td>
+            <td><span contenteditable>{{ purchase['quantity'] }}</span></td>
+            <td><span data-prefix>$</span><span>{{ purchase['price'] }}</span></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <a class="add">+</a>
+    <table class="balance">
+        <tr>
+            <th><span contenteditable>Total</span></th>
+            <td><span data-prefix>$</span><span>{{ total }}</span></td>
+        </tr>
+    </table>
+</article>
+</body>
 </html>
