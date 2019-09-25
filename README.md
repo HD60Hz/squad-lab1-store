@@ -17,7 +17,21 @@ Anyway, in this lab we are going the super easy route. So we are going to create
 
 [Jinja](https://jinja.palletsprojects.com/en/2.10.x/) is very powerfull and widely used templating engine for Python. We will use it to fill placeholders inside our invoice template
 
-First let's create ``invoice.html`` inside a templates folder and a ``printer`` module
+To install Jinja run the command
+
+```shell
+pip install jinja
+```
+
+To install pdfkit run the command
+
+```shell
+pip install pdfkit
+```
+
+pdfkit uses [wkhtmltopdf](https://wkhtmltopdf.org/index.html) internally for HTML to PDF conversion. We need to [install](https://wkhtmltopdf.org/downloads.html) it
+
+Next, let's create ``invoice.html`` inside a templates folder and a ``printer`` module
 
 <pre>
 storify
@@ -206,3 +220,9 @@ data
 │       └── invoice_20190902-112034.pdf
 ...
 </pre>
+
+Again, because we have new dependencies, we have to update ``requirements.txt``. Run the command :
+
+```shell
+pip install -r requirements.txt
+```
