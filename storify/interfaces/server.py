@@ -3,11 +3,14 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from threading import Thread, local
 
 from storify.store import Store
+from storify.utils.server import patch_input, patch_print
+
+local = local()
+patch_input(local)
+patch_print(local)
 
 HOST = '127.0.0.1'
 PORT = 65432
-
-local = local()
 
 
 class StoreServer(Thread):
@@ -20,17 +23,20 @@ class StoreServer(Thread):
         self.__cmds = CustomerREPL(store)
 
         self.__sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.__sock.bind((HOST, PORT))
+        self.__sock.listen()
         super().__init__()
 
     def run(self):
         while not self.__closed:
-            self.__sock.listen()
-            conn, addr = self.__sock.accept()
-            conn.setblocking()
-            self.__conns.append(conn)
-            print('\nCustomer connected', addr)
-            self.__pool.submit(self._serve_client, conn, self.__cmds)
+            try:
+                conn, addr = self.__sock.accept()
+                self.__conns.append(conn)
+                print('\nCustomer connected', addr)
+                self.__pool.submit(self._serve_client, conn, self.__cmds)
+            except OSError as e:
+                print(e)
 
     def close(self):
         self.__closed = True
@@ -48,43 +54,16 @@ class StoreServer(Thread):
         local.conn = conn
         with conn:
             while True:
-                try:
-                    print('pre recv')
-                    command = conn.recv(1024)
-                    if not command:
-                        break
+                command = conn.recv(1024)
+                if not command:
+                    break
 
-                    handler_name = 'do_{cmd}'.format(cmd=command.decode('utf-8').strip().lower())
-                    if handler_name == 'do_exit':
-                        break
+                handler_name = 'do_{cmd}'.format(cmd=command.decode('utf-8').strip().lower())
+                if handler_name == 'do_exit':
+                    break
 
-                    handler = getattr(cmds, handler_name, None)
-                    if handler:
-                        handler(None)
-                    else:
-                        conn.sendall('Unknown command\n'.encode('utf-8'))
-
-                    print('post send')
-                except Exception:
-                    conn.close()
-
-
-def get_patched_input():
-    def patched(value):
-        if hasattr(local, 'conn'):
-            local.conn.sendall(value.encode('utf-8'))
-            return local.conn.recv(1024)
-        else:
-            input(value)
-
-    return patched
-
-
-def get_patched_print():
-    def patched(value):
-        if hasattr(local, 'conn'):
-            local.conn.sendall(f'{value}\n'.encode('utf-8'))
-        else:
-            print(value)
-
-    return patched
+                handler = getattr(cmds, handler_name, None)
+                if handler:
+                    handler(None)
+                else:
+                    conn.sendall('Unknown command\n'.encode('utf-8'))
