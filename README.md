@@ -2,7 +2,7 @@ LAB1 SQUAD TRAINING - PYTHON
 ---
 
 ### Invoice
-After shopping in our store, the least we can give do is provide the customer with his due invoice. We will go with one of the most popular document format : PDF  
+After shopping in our store, the least we can do is provide the customer with his due invoice. We will go with one of the most popular document format : PDF  
 
 There are many Python libraries to manage PDFs. _FPDF, pyPDF, Reportlab, PrinceXML, Weasyprint, pdfkit_... from small and easy to use to professional with complete features.  
 The problem and use case at hand will help you filter:  
@@ -51,7 +51,7 @@ The information that our invoice will hold are :
 For each purchase 
 * Name
 * Rate
-* Quatity
+* Quantity
 * Price
 
 ```html
@@ -224,5 +224,5 @@ data
 Again, because we have new dependencies, we have to update ``requirements.txt``. Run the command :
 
 ```shell
-pip install -r requirements.txt
+pip freeze > requirements.txt
 ```
