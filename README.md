@@ -1,6 +1,8 @@
 LAB1 SQUAD TRAINING - PYTHON
 ---
 
+### Python
+
 * What is Python ?  
     - Programming language created by Guido van Rossum in 1991
     - Interpreted
@@ -17,75 +19,90 @@ LAB1 SQUAD TRAINING - PYTHON
     - Portability
     - Fast enough for a lot of use cases (Alternative for use cases where speed is important for later)
 
-### Let's stop the theory and start practicing ...
+### Installation
 
-### 1. PYTHON
-First we need to have Python in our environment.
+#### Python
+First we need to have _Python_ in our environment.
 To check if and what version is already installed run command:
-```shell
+
+```shell script
 python --version
 ```
+
 Result: 
-> Python 3.7.3
+<pre>
+Python 3.7.3
+</pre>
 
-*If Python is not installed, follow this [Tutorial](https://realpython.com/installing-python/)*...
-*For this lab we are using Python version > 3.6*
+> If Python is not installed, follow this [Tutorial](https://realpython.com/installing-python/)  
+> For this lab we are using Python version > 3.6 
 
-### 2. PIP
-To manage your python package, you need a package manager... 
-The most popular one is PIP   
-*FUNNY: pip is a recursive acronym that stands for "Pip Installs Packages"*
+#### PIP
+To manage your _Python_ package, you need a package manager. The most popular one is [PIP](https://pip.pypa.io/en/stable/)
 
-Starting from Python version 3.4...
-PIP is included by default in Python installers
+> _PIP_ is a recursive acronym that stands for "Pip Installs Packages"
 
-**SO**... 
-to verify that PIP is installed, run command:
-```shell
+Starting from _Python_ version **3.4**, _PIP_ is included by default in Python installers  
+To verify that _PIP_ is installed, run command:
+
+```shell script
 pip --version
 ```
-Result: 
-> pip 19.1.1 from /usr/local/lib/python3.7/site-packages/pip (python 3.7)
 
-PIP can install packages from:  
+Result: 
+<pre>
+pip 19.1.1 from /usr/local/lib/python3.7/site-packages/pip (python 3.7)
+</pre>
+
+_PIP_ can install packages from:  
 - VCS project URLs
 - Local project directories
 - Local or remote source archives
-- Remote repositories called indexes... most known one is PyPI (Python Package Index)
+- Remote repositories called indexes... most known one is [PyPI](https://pypi.org/) (Python Package Index)
 
-When a package is installed with PIP using the command (example package - cowsay):
-```shell
+When a package is installed with _PIP_, it will put the package files in _Python global package directories_ (e.g. site-packages)  
+Let's install for example a simple package [cowsay](https://pypi.org/project/cowsay/) using the command: 
+
+```shell script
 pip install cowsay
 ```
+
 Result:
 > Collecting cowsay
 > Using cached https://files.pythonhosted.org/packages/d4/68/af23fbf90493044fc2ea83cd62923b9952c2d38eeeab83e0c016706bfbc8/cowsay-2.0.3-py2.py3-none-any.whl
 > Installing collected packages: cowsay
 > Successfully installed cowsay-2.0.3
 
-... the manager will put the package files in python global package directories (e.g. site-packages)
->  /usr/local/lib/python3.7/site-packages/
+```shell script
+ls /usr/local/lib/python3.7/site-packages
+```
 
-The problem with the strategy used by python to resolve packages and modules is that all python projects
-will share the same packages versions
+Result:
+<pre>
+...
+cowsay
+cowsay-2.0.3.dist-info
+...
+</pre>
 
-*SOLUTION: VIRTUAL ENVIRONMENTS*
+The problem with the _Python_ packages/modules resolution strategy is that all projects present in the machine will share the **same packages versions**
 
-### 3. VENV
+### VENV
 
-VENV is a python package that allow us to encapsulate each project in its own bubble
-with its proper python and pip binaries... and thus its own site packages directories
+[VENV](https://docs.python.org/3/library/venv.html) is a python package that can be use to encapsulate each project in its bubble
+with its own _Python and PIP binaries_, hence its own site packages directories
 
-Starting from Python version 3.3...
-VENV is included by default in Python installers
+Starting from Python version **3.3**, _VENV_ is included by default in _Python installers_
 
 To create a new virtual env run command:
-```shell
-python -m venv env
+
+```shell script
+python -m venv venv
 ```
-Result: \<current directory structure\>
+
+Result (file system):
 <pre>
-env
+venv
 ├── bin
 │   ├── activate
 │   ├── activate.csh
@@ -105,61 +122,79 @@ env
 └── pyvenv.cfg
 </pre>
 
-Your virtual environment is created... **BUT** not activated
-To activate your venv run command:
-```shell
-source env/bin/activate
+Your virtual environment is created... **BUT** not activated. To activate your _venv_ run command:
+
+```shell script
+source venv/bin/activate
 ```
-Result:
-> (env) Project $
 
-The "(env)" indicate that you are in the python virtual environment
-Now all installed packages will be local to the project
+Result (shell):
 
-To desactivate your virtual env run command :
-```shell
+<pre>
+(venv) Project $
+</pre>
+
+The **(venv)** indicate that you are in the _Python virtual environment_, This means that now all installed packages will be local to the project
+
+To deactivate your _virtual env_, run command:
+
+```shell script
 deactivate
 ```
+
 Result:
-> Project $
+<pre>
+Project $
+</pre>
 
-### 4. HELLO WORLD
+#### Hello World
 
-Now that we installed our environment and of course activated the virtual one... Shall we create a Hello Word program ?
+Now that we installed _Python_ and activated our _virtual environment_... Shall we create a Hello Word program ?
 
-Start by creating a ```main.py``` in your project directory (root) with this content :
+Start by creating a ```main.py``` in your project directory (root) with this content:
+
 ```python
 print("HELLO WORLD")
 ```
-Then run the command :
-```shell
+
+Then run command:
+
+```shell script
 python main.py
 ```
+
 Result:
-> HELLO WORLD
 
-Do you remember the package we installed as an example : cowsay
-Let's try using it to say "Hello World"
+<pre>
+HELLO WORLD
+</pre>
 
-Change your ```main.py``` content to :
+Do you remember the package we installed as an example: _cowsay_? Let's try using it to say **Hello World**
+
+Change your ```main.py``` content to:
+
 ```python
 import cowsay
 
 cowsay.tux("Hello World")
 ```
-Result:
-> Traceback (most recent call last):
-> File "\<stdin\>", line 1, in \<module\>
-> ModuleNotFoundError: No module named 'cowsay'
-
-Ooops ... as said earlier the package was installed in the global python package directory before we created and activated our venv... This means that we need to reinstall it again in our venv python package directory
-
-*You should know how to do it yourself by now* 
-
-Let's re-run the command again   
 
 Result:
-```
+<pre>
+Traceback (most recent call last):
+File "< stdin >", line 1, in < module >
+ModuleNotFoundError: No module named 'cowsay'
+</pre>
+
+Oops!... as said earlier the package was installed in the global _Python package directory_ before we created our _venv_. This means that we need to reinstall it again in our _venv_ package directory
+
+> You should know how to do it yourself by now!
+
+Let's re-run the command 
+
+Result:
+
+<pre>
   ___________
 < Hello World >
   ===========
@@ -174,5 +209,4 @@ Result:
                /'\_   _/`\
                \___)=(___/
               
-              
-```
+</pre>
