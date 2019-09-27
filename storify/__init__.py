@@ -8,10 +8,11 @@ ROOT_DIR = Path(__file__).parents[1]
 DATA_DIR = ROOT_DIR / 'data'
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
+
 def main():
     store = Store(name="OPEN store")
     server = StoreServer(store)
+    server.daemon = True
     server.start()
     StoreREPL(store).cmdloop()
-    server.close()
     store.close()
