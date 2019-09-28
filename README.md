@@ -2,12 +2,12 @@ LAB1 SQUAD TRAINING - PYTHON
 ---
 
 ### Scraping
-Till now, we have being focusing only on super motivated eager managers that are ready to spend time managing the inventory product by product. There are a lot of LAZY managers out there that have the need to run their store and have an automatically collected inventory from a remote place. This is just a stupid and naive functionality that we will add to introduce : Scraping the web
+Till now, we have being focusing only on super motivated eager managers that are ready to spend time managing the inventory product by product. There are a lot of LAZY managers out there that have the need to run their store and have an automatically collected inventory from a remote place. This is just a stupid and naive functionality that we will add to introduce : _Scraping the web_
 
-Web Scraping is simply the action of extracting data from websites. The 'Web' part of the term reference the use of the World Wide Web and generally its popular protocole : HTTP.
-Scraping can be done manually by a hard working person but normally it refers to the use of an automated process (bot, web crawler) to retrieve data into some kind of database for futur uses (ex: Data analysis)
+Web Scraping is simply the action of extracting data from websites. The "Web" part of the term reference the use of the World Wide Web and generally its popular protocol : _HTTP_.
+Scraping can be done manually by a hard working person but normally it refers to the use of an automated process (bot, web crawler) to retrieve data into some kind of database for future uses (ex: Data analysis)
 
-Unless we want to create a complex and intelligent scraping (crawler-like) system that will automatically analyse different website structures and dynamically search for the targeted informations, the common way of conceptualizing a scraper involve analysing manually the unique and unchanged structure of a single website then code accordingly
+Unless we want to create a complex and intelligent scraping (crawler-like) system that will automatically analyse different website structures and dynamically search for the targeted information, the common way of conceptualizing a scraper involve analysing manually the unique and unchanged structure of a single website then code accordingly
 
 The website that will be used for this lab is **Home24**
 
@@ -50,7 +50,7 @@ We are going to take a different route and try to focus on the article tiles. Th
 </div>
 ...
 ```
-We need to extract just 2 informations for each article :
+We need to extract just 2 pieces of information for each article :
 * Product name present in the ``article-tile__name`` div element
 * Product price present in the ``article__price`` div element
 
@@ -66,7 +66,7 @@ We need to extract just 2 informations for each article :
 	*	Support for gzip and deflate encoding.
 	*	Proxy support for HTTP and SOCKS.
 	
-* [requests](https://2.python-requests.org/en/master/) is an elegant and simple HTTP library for Python built on top of urllib3. It is highly recommanded library inside the Python community. This wrapper offers a super easy to use API and extended functionalities compared to the previous libs :
+* [requests](https://2.python-requests.org/en/master/) is an elegant and simple HTTP library for Python built on top of urllib3. It is highly recommended library inside the Python community. This wrapper offers a super easy to use API and extended functionalities compared to the previous libs :
 	*  International Domains and URLs
 	*	Sessions with Cookie Persistence
 	*	Browser-style SSL Verification
@@ -79,12 +79,14 @@ We need to extract just 2 informations for each article :
 Obviously we are going to use the ``requests`` library.
 Because it is not a standard one, we have to install it. From our virtual environment, run the command :
 
-```shell
+```shell script
 pip install requests
 ```
-Result:
 
-> Successfully installed certifi-2019.9.11 chardet-3.0.4 idna-2.8 requests-2.22.0 urllib3-1.25.3
+Result:
+<pre>
+Successfully installed certifi-2019.9.11 chardet-3.0.4 idna-2.8 requests-2.22.0 urllib3-1.25.3
+</pre>
 
 ### Home24 Scraper
 Let's create a ``scraper`` module along side the ``store`` module
@@ -113,10 +115,10 @@ if __name__ == '__main__':
 
 Let's run the module to see what we get as result. Run command
 
-```shell
+```shell script
 python storify/scraper.py
 ```
-OH!! We get all the html page content as bytes. it is not exploitabled as is. We need to parse it
+OH!! We get all the html page content as bytes. it is not explotable as is. We need to parse it
 
 #### Beautiful Soup 4
 [BS4](http://www.crummy.com/software/BeautifulSoup/) is a Python library for parsing and pulling data out of HTML and XML files. It provides ways to navigate, search, and modify the parse tree (soup)
@@ -125,11 +127,14 @@ We will create a soup out of the response content, then search for the article t
 
 Don't forget to install ``bs4`` first. Run command
 
-```shell
+```shell script
 pip install bs4
 ```
+
 Result:
-> Successfully installed beautifulsoup4-4.8.0 bs4-0.0.1 soupsieve-1.9.3
+<pre>
+Successfully installed beautifulsoup4-4.8.0 bs4-0.0.1 soupsieve-1.9.3
+</pre>
 
 Our store need product quantities. But the Home24 website does not display them for it articles. We will generate fake and random quantities for each instance. Our LAZY managers won't notice anyway
 
@@ -157,7 +162,7 @@ The displayed price for the articles have a special format : <pre>'     300,00  
 
 Let's check what we retrieved now. Run command
 
-```shell
+```shell script
 python storify/scraper.py
 ```
 Result :
@@ -194,6 +199,7 @@ class Store:
 
 That's it ! Let's remove any inventory file left and run storify
 
+Result:
 <pre>
 Welcome to OPEN Store store. Type help or ? to list commands.
 
@@ -215,6 +221,7 @@ Store>
 
 The inventory is saved after scraping and we get an inventory file
 
+Result:
 <pre>
 Matelas confort Premium Smood,299.99,14
 Lit boxspring Kinx,879.99,35
@@ -232,10 +239,11 @@ Fauteuil de relaxation Vancouver,199.99,20
 Before we finish this chapter, we need to address one last issue  
 We installed some third-party libraries lately and it would bad to reinstall them one by one in an other environment
 
-First, let's list all the dependencies that we have in our ``venv`` by running the command :
-```shell
+First, let's list all the dependencies that we have in our _venv_ by running the command :
+```shell script
 pip list
 ```
+
 Result : 
 <pre>
 Package        Version
@@ -253,14 +261,14 @@ urllib3        1.25.3
 </pre>
 
 To be able to reinstall them, they must be saved in a versioned file. The convention is to use ``requirements.txt`` in root of the project for that  
-This file should content a rows of dependency lines like : ``beautifulsoup4==4.8.0``
-The best way to manage this file is through ``pip`` as shown :
+This file should content a rows of dependency lines like : **beautifulsoup4==4.8.0**
+The best way to manage this file is through _pip_ as shown :
 
-```shell 
+```shell script
 pip freeze > requirements.txt
 ```
-Result (requirements.txt content) :
 
+Result (requirements.txt content) :
 <pre>
 beautifulsoup4==4.8.0
 bs4==0.0.1
@@ -275,7 +283,7 @@ urllib3==1.25.3
 
 Finally to reinstall the dependencies, just run the command :
 
-```shell
+```shell script
 pip install -r requirements.txt
 ```
 
