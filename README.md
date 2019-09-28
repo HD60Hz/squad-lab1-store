@@ -2,7 +2,7 @@ LAB1 SQUAD TRAINING - PYTHON
 ---
 
 ### Concurrency
-Until now all the execution parts of the application are sequential. When a code take longer to execute, because of long processing or some IO related stuff, the rest of the app need to wait till the end even though it does not depend on it  
+All the execution parts of the application are sequential. When a code take longer to execute, because of long processing or some IO related stuff, the rest of the app need to wait until the end, even though it does not depend on it  
 To have a closer look at that, we will try to add a sleep in the ``retrieve_articles`` of the scraper for each article (ex: sleep for 4 seconds)
 
 ```python
@@ -29,8 +29,7 @@ import time
 ...
 ```
 
-If we remove the inventory database to trigger the scraping then run _storify_, we will notice a big freeze. It is because the REPL is not yet looping  
-The scraping starts when the store initializes. So everything is blocked till the retrieval of all Home24 articles is finished
+If we remove the inventory database to trigger the scraping then run storify, we will notice a big freeze. It is because the REPL is not yet looping. In fact, the scraping starts when the store initializes. So everything is blocked waiting for the retrieval of all Home24 articles
 
 An analogy to this situation would be:  
 Imagine we have a store with an inventory room and a backdoor where our provider can park his truck
@@ -42,7 +41,7 @@ Imagine we have a store with an inventory room and a backdoor where our provider
 
 In Python to achieve multitasking, we can either use:
 * _Thread_ for preemptive multitasking (Limited by the [GIL](https://wiki.python.org/moin/GlobalInterpreterLock) in the case of CPython)
-* Asynchronous IO (ex: using _asyncio_) for cooperative multitasking
+* _Asynchronous IO_ (ex: using [asyncio](https://docs.python.org/3/library/asyncio.html)) for cooperative multitasking
 
 On the other hand to achieve real parallelism, we have to use ``multiprocessing``  
 [Here](https://realpython.com/python-concurrency/) is a good introduction all those concepts
@@ -129,7 +128,7 @@ class Store:
 
                 store.save_inventory()
 
-            task = Thread(target=push_from_home24, args,(self,))
+            task = Thread(target=push_from_home24, args=(self,))
             task.start()
 ```
 
@@ -210,7 +209,8 @@ Great, we are overlapping the task (multitasking) so that when one task is sleep
 
 Now imagine we have 1000 website to scrap. It would be somewhat costly and inefficient to create a Thread for each task. We have to create a **Pool** of threads
 
-_ThreadPoolExecutor_ is sweet wrapper to hide the complexity of managing multiple Thread. It is offered by the standard library _concurrent.futures_
+``ThreadPoolExecutor`` is a sweet wrapper that hides the complexity of managing multiple Thread. It is offered by the standard module ``concurrent.futures``
+
 ```python
 from concurrent.futures.thread import ThreadPoolExecutor
 ...
@@ -222,8 +222,8 @@ from concurrent.futures.thread import ThreadPoolExecutor
         executor.submit(push_from_home24, self, Home24Categories.LUMINAIRE)
 ...
 ```
-In this example we create 3 worker to handle 3 tasks. But it does not have to be the case  
-In real world application you need to benchmark you application to find the sweet spot between the number of thread and the task in hand
+
+In this example we create 3 worker to handle 3 tasks. But it does not have to be the case. In real world application you need to benchmark you application to find the sweet spot between the number of thread and the task in hand
 
 In functional style it would be...
 
@@ -237,11 +237,11 @@ from functools import partial
     ...
 ```
 
-Unlike processes that have their own memory space, Threads share their parent process memory. This means that you have to be extra careful about Thread-safety  
-If some tasks involve manipulating/referencing the same data, you have to use some mechanism (Locks, conditions...) to make you code thread-safe
+Unlike processes that have their own memory space, threads share their parent process memory. This means that you have to be extra careful about Thread-safety  
+If some tasks involve manipulating/referencing the same data, you have to use some mechanism (Locks, conditions...) to make your code thread-safe
 
 In our case the ``items_count`` is incremented by the product quantity. So we can have a race condition if there is a preemptive interruption from the os  
-Let's use a ``Lock`
+Let's use a ``Lock``
 
 ```python
 from threading import Lock
@@ -266,7 +266,7 @@ from threading import Lock
 [Multiprocessing](https://docs.python.org/3/library/multiprocessing.html) in Python have the same API as threading (seen above). But because each process has its own memory space, it is more complex to manage shared data in our program. The solution must involve some kind of inter-process communication (IPC)  
 In our case, because of the shared ``inventory`` and ``items_count``, it would be difficult to find AS a simple and elegant solution AS using threads
 
-This is how it would look like if we want to force the use of a pool of processes and a manager
+This is how it would look like if we want to force the use of a pool of processes and a ``Manager``
 
 ```python
 from concurrent.futures.process import ProcessPoolExecutor
@@ -315,9 +315,9 @@ def main():
 Imagine we want to schedule some task to be executed periodically or at a certain time. For example, we need to schedule an event for saving the store inventory every 10 seconds  
 
 There are many libraries in Python to handle scheduling
-* **sched** is a simple standard library that offers basic scheduling functionality 
-* **schedule** is a third-party library alternative with a fluent API (DSL)
-* **APScheduler** is a powerful and complete third-party library with support for concurrency and job storages
+* [sched](https://docs.python.org/3/library/sched.html) is a simple standard library that offers basic scheduling functionality 
+* [schedule](https://github.com/dbader/schedule) is a third-party library alternative with a fluent API (DSL)
+* [APScheduler](https://apscheduler.readthedocs.io/en/latest/) is a powerful and complete third-party library with support for concurrency and job storages
 
 First, let's try writing our own implementation with a simple loop and a ``time.sleep``. To avoid blocking we will use a thread
 
@@ -361,9 +361,9 @@ def main():
 ```
 
 Now run storify and keep an eye on the inventory file ... For certainty, add a ``print`` inside ``save_inventory``  
-YEP! it is executing the save every 10 seconds without blocking us
+YEP! It is executing the save every 10 seconds without blocking us
 
-Let's try _APScheduler_ this time. Begin by installing it
+Let's try ``apscheduler`` this time. Begin by installing it
 
 ```shell script
 pip install apscheduler
@@ -383,7 +383,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 As simple as that !
 
-We added APScheduler to our dependencies, don't forget to add it to ``requirements.txt``  
+We added _APScheduler_ to our dependencies, don't forget to add it to ``requirements.txt``  
 
 ```shell script
 pip freeze > requirements.txt
