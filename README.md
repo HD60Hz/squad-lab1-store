@@ -2,9 +2,9 @@ LAB1 SQUAD TRAINING - PYTHON
 ---
 
 ### Invoice
-After shopping in our store, the least we can do is provide the customer with his due invoice. We will go with one of the most popular document format : PDF  
+After shopping in our store, the least we can do is provide the customer with his due invoice. We will go with one of the most popular document format: **PDF**  
 
-There are many Python libraries to manage PDFs. _FPDF, pyPDF, Reportlab, PrinceXML, Weasyprint, pdfkit_... from small and easy to use to professional with complete features.  
+There are many Python libraries to manage PDFs: _FPDF, pyPDF, Reportlab, PrinceXML, Weasyprint, pdfkit_... from small and easy to use to professional with complete features.  
 The problem and use case at hand will help you filter:  
 * Create PDF from scratch VS alter existing one
 * Use of programmatic API to construct the document VS use of markup language (ex: RML) 
@@ -15,17 +15,17 @@ Anyway, in this lab we are going the super easy route. So we are going to create
 
 #### Invoice Template
 
-[Jinja](https://jinja.palletsprojects.com/en/2.10.x/) is very powerfull and widely used templating engine for Python. We will use it to fill placeholders inside our invoice template
+[Jinja2](https://jinja.palletsprojects.com/en/2.10.x/) is very powerfull and widely used templating engine for Python. We will use it to fill placeholders inside our invoice template
 
 To install Jinja run the command
 
-```shell
-pip install jinja
+```shell script
+pip install jinja2
 ```
 
 To install pdfkit run the command
 
-```shell
+```shell script
 pip install pdfkit
 ```
 
@@ -33,6 +33,7 @@ pdfkit uses [wkhtmltopdf](https://wkhtmltopdf.org/index.html) internally for HTM
 
 Next, let's create ``invoice.html`` inside a templates folder and a ``printer`` module
 
+Result (file system):
 <pre>
 storify
     ├── ...
@@ -42,7 +43,7 @@ storify
         └── invoice.html
 </pre>
 
-The information that our invoice will hold are :
+The information that our invoice will hold are:
 * Title
 * Invoice id
 * Current date
@@ -111,7 +112,7 @@ For each purchase
 
 #### Printer
 
-Next we will create the ``InvoicePrinter`` in our ``printer`` module. Obviously, this printer will have a ``print`` method (the only method for now) 
+Next we will create the ``InvoicePrinter`` in our ``printer`` module. Obviously, this printer will have a ``print`` method
 
 ```python
 import random
@@ -129,7 +130,6 @@ from storify.store import Purchase, Store
 INVOICE_TEMPLATE_FILE = 'invoice.html'
 INVOICE_DIRNAME = 'invoices'
 INVOICE_PREFIX = 'invoice'
-
 
 class InvoicePrinter:
     def __init__(self, title):
@@ -159,12 +159,13 @@ class InvoicePrinter:
         pdfkit.from_string(output, self.__invoice_dir / f'{INVOICE_PREFIX}_{time.strftime("%Y%m%d-%H%M%S")}.pdf')
 ```
 
-In the initialization phase, after resolving and creating the _invoice directory_ inside the data folder. We create the _Jinja file system loader_ and we point it to our ``templates`` folder. After that we create the _jinja environment_ that will compile and create the template objects internally. We keep reference to the invoice template object
+In the initialization phase, after resolving and creating the _invoice directory_ inside the data folder. We create the Jinja file system loader and we point it to our ``templates`` folder. After that we create the jinja environment that will compile and create the template objects internally  
+We keep reference of the invoice template object
 
-When a _print_ is requested, we simply render the invoice with all the provided data. The output is fed to _pdfkit_ to generate the invoice PDF
+When a ``print`` is requested, we simply render the invoice with all the provided data. The output is fed to _pdfkit_ to generate the invoice PDF
 
 #### Invoice on checkout
-While initializing the store, we will create the invoice printer with store name as the title. The printer is used in the end of the checkout
+While initializing the store, we will create the invoice printer with store name as the title. The printer is used at the end of the checkout
 
 ```python
 class Store:
@@ -184,6 +185,7 @@ class Store:
 
 Let's test it 
 
+Result:
 <pre>
 Store>simulate_customer
 Customer>pick_product
@@ -207,8 +209,7 @@ Total: 1979.97
 Customer>
 </pre>
 
-Result :
-
+Result (file system):
 <pre>
 data
 │   ├── inventory.csv
@@ -221,8 +222,8 @@ data
 ...
 </pre>
 
-Again, because we have new dependencies, we have to update ``requirements.txt``. Run the command :
+Again, because we have new dependencies, we have to update ``requirements.txt``
 
-```shell
+```shell script
 pip freeze > requirements.txt
 ```
