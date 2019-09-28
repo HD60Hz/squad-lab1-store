@@ -2,7 +2,7 @@ LAB1 SQUAD TRAINING - PYTHON
 ---
 
 ### Storify
-For the rest of this lab we are going to focus on the creation of a store management application. This will allow us to have a practical context for our Python learning.
+For the rest of this lab we are going to focus on the creation of a **store management application**. This will allow us to have a practical context for our Python learning.
 First we need to define some simple use case specifications that will bound our application and that we can extend later if we want to.
 
 #### Specifications
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     )
     print(store)
 ```
-To avoid pointing to product attributes by index in the tuple, we can replace it with a namedtuple. It is a subclass used to create tuple-like objects that have fields accessible by attribute lookup as well as being indexable and iterable.
+To avoid pointing to product attributes by index in the tuple, we can replace it with a _namedtuple_. It is a subclass used to create tuple-like objects that have fields accessible by attribute lookup as well as being indexable and iterable.
 
 ```python
 from collections import namedtuple
@@ -200,13 +200,13 @@ if __name__ == '__main__':
     run_store_shell(store)
 ```
 
-You can notice that, with this version, each command handler receive a context (store) as argument. This will allow them to update the mutable context to achive their purpose.
+You can notice that, with this version, each command handler receive a context (store) as argument. This will allow them to update the mutable context to achieve their purpose.
 
 When we run the program
-```shell
+```shell script
 python storify.py
 ```
-Result :
+Result:
 <pre>
 
 =================================
@@ -245,12 +245,15 @@ if __name__ == '__main__':
 ```
 When we choose the command 1 corresponding to inventory listing we get :
 
+Result:
 <pre>
 0 screen      600.0      3
 1 mouse          40     10
 </pre>
 
-A better way to print a list in tabular form is to use some existing library like ``tabulate``
+A better way to print a list in tabular form is to use some existing library like _tabulate_.  
+tabulate tries to detect column types automatically, and aligns the values properly
+
 We begin by installing it using :
 ```shell
 pip install tabulate
@@ -263,7 +266,7 @@ def list_inventory(store):
     print(tabulate(store["inventory"], headers="keys", showindex=True))
 ...
 ```
-Result :
+Result:
 <pre>
     name      price    quantity
 --  ------  -------  ----------
@@ -288,6 +291,7 @@ def add_product(store):
 ```
 When we choose the command 2 corresponding to adding new  product we get :
 
+Result:
 <pre>
 Add new product...
 Name> Chocolat
@@ -297,6 +301,7 @@ Quantity> 30
 
 Re-listing the inventory will prove that the new product is added
 
+Result:
 <pre>
     name        price    quantity
 --  --------  -------  ----------
@@ -323,6 +328,7 @@ def remove_product(store):
 ```
 When we choose the command 3 corresponding to removing existing product we get :
 
+Result:
 <pre>
 Choose a product> 0
 Product has been removed : Product(name='screen', price=600.0, quantity=3)
@@ -330,13 +336,14 @@ Product has been removed : Product(name='screen', price=600.0, quantity=3)
 
 Re-listing the inventory will prove that the chosen product is removed
 
+Result:
 <pre>
     name      price    quantity
 --  ------  -------  ----------
  0  mouse        40          10
 </pre>
 
-Notice that the id 0 is still present because the inventory has been reindexed (id = index for simplicity)
+Notice that the id 0 is still present because the inventory has been **reindexed** (id = index for simplicity)
 
 * **Modify product**
 ```python
@@ -358,8 +365,9 @@ def modify_product(store):
     except IndexError:
         print("You must choose an existing product")
 ```
-When we choose the command 4 corresponding to modifing existing product we get :
+When we choose the command 4 corresponding to modifying existing product we get :
 
+Result:
 <pre>
 Choose a product> 0
 Modify product : Product(name='screen', price=600.0, quantity=3)
@@ -385,7 +393,7 @@ We implemented the REPL system so that each time a command is chosen the corresp
 
 One hacky solution (for learning purpose) is to raise an exception to notify from the handler to allow REPL to stop by catching it.
 
-> StopIteration is a builtin exception used to stop iteration over iterators
+> _StopIteration_ is a builtin exception used to stop iteration over iterators
 
 ```python
 COMMANDS = [
@@ -409,6 +417,7 @@ def run_store_shell(store):
 
 When we choose the command 0 to exit we get :
 
+Result:
 <pre>
         Items count : 13
 
