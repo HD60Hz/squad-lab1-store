@@ -11,7 +11,7 @@ The problem and use case at hand will help you filter:
 * Generate from simpler format (ex: HTML)  
 ...
 
-Anyway, in this lab we are going the super easy route. So we are going to create our invoice using ``pdfkit`` from an ``jinja2`` generated HTML
+Anyway, in this lab we are going the super easy route. So we are going to create our invoice using _pdfkit_ from an _jinja2_ generated HTML
 
 #### Invoice Template
 
@@ -19,13 +19,13 @@ Anyway, in this lab we are going the super easy route. So we are going to create
 
 To install Jinja run the command
 
-```shell
+```shell script
 pip install jinja
 ```
 
 To install pdfkit run the command
 
-```shell
+```shell script
 pip install pdfkit
 ```
 
@@ -33,6 +33,7 @@ pdfkit uses [wkhtmltopdf](https://wkhtmltopdf.org/index.html) internally for HTM
 
 Next, let's create ``invoice.html`` inside a templates folder and a ``printer`` module
 
+Result (File System structure):
 <pre>
 storify
     ├── ...
@@ -159,9 +160,9 @@ class InvoicePrinter:
         pdfkit.from_string(output, self.__invoice_dir / f'{INVOICE_PREFIX}_{time.strftime("%Y%m%d-%H%M%S")}.pdf')
 ```
 
-In the initialization phase, after resolving and creating the _invoice directory_ inside the data folder. We create the _Jinja file system loader_ and we point it to our ``templates`` folder. After that we create the _jinja environment_ that will compile and create the template objects internally. We keep reference to the invoice template object
+In the initialization phase, after resolving and creating the _invoice directory_ inside the data folder. We create the Jinja file system loader and we point it to our ``templates`` folder. After that we create the jinja environment that will compile and create the template objects internally. We keep reference to the invoice template object
 
-When a _print_ is requested, we simply render the invoice with all the provided data. The output is fed to _pdfkit_ to generate the invoice PDF
+When a ``print`` is requested, we simply render the invoice with all the provided data. The output is fed to _pdfkit_ to generate the invoice PDF
 
 #### Invoice on checkout
 While initializing the store, we will create the invoice printer with store name as the title. The printer is used in the end of the checkout
@@ -184,6 +185,7 @@ class Store:
 
 Let's test it 
 
+Result:
 <pre>
 Store>simulate_customer
 Customer>pick_product
@@ -208,7 +210,6 @@ Customer>
 </pre>
 
 Result :
-
 <pre>
 data
 │   ├── inventory.csv
@@ -223,6 +224,6 @@ data
 
 Again, because we have new dependencies, we have to update ``requirements.txt``. Run the command :
 
-```shell
+```shell script
 pip freeze > requirements.txt
 ```
