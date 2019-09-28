@@ -14,9 +14,9 @@ So let's see how we can refactor our code to improve it
 One way to think about the separation is to suppose our store can be managed with multiple interfaces or can have no interface at all. They must be a loose coupling between the interfaces and the store.
 More importantly, they need to have a unidirectional relationship between them. A store doesn't need to know about the existence of an application interface. However the application interface should know about, hence, carve itself based on its logic.
 
-Let's start by separating storify into multiple files :
+Let's start by separating storify into multiple files:
 
-Result(Structure of storify):
+Result (file system):
 <pre>
 .
 ├──...
@@ -28,11 +28,11 @@ Result(Structure of storify):
     └── store.py
 </pre>
 
-Now, Storify is a package containing a subpackage for the interfaces and a store module. We moved ``create_store`` and ``Product`` definitions into ``store``  and kept the rest in ``repl`` module
+Now, ``storify`` is a package containing a subpackage for the interfaces and a ``store`` module. We moved ``create_store`` and ``Product`` definitions into ``store``  and kept the rest in ``repl`` module
 
 The ``__init__.py`` is the initialisation file for the storify package. We can use it to define a ``main`` function that creates a store and run it in a REPL
 
-```python
+```Python
 from storify.interfaces.repl import run_repl
 from storify.store import create_store, Product
 
@@ -46,21 +46,21 @@ def main():
     )
     run_repl(store)
 ```
-Notice the imports statements on top. They use relative paths to modules in the form of : \<package\>.\<subpackage\>..\<module\> to import elements from them. To allow python interpreter to know the location of the packages that you import from, you need to add the location of the root of the project to python path either by ``PYTHONPATH`` environnement variable or ``sys.path``
+Notice the imports statements on top. They use relative paths to modules in the form of: **\<package\>.\<subpackage\>..\<module\>** to import elements from them. To allow Python interpreter to know the location of the packages that you import from, you need to add the location of the root of the project to Python path either by ``PYTHONPATH`` environnement variable or ``sys.path``
 
-To keep the same command (kind of) for running storify, we can use ``__main__.py`` as the entry point for the application
+To keep the same command (kind of) for running storify, we can use ``__main__.py`` as the application entry point 
 
-```python
+```Python
 from storify import main
 
 if __name__ == '__main__':
     main()
 ```
 
-Let's test it. run the command :
+Let's test it. run the command:
 
 ```shell script
-python storify
+Python storify
 ```
 
 Result:
@@ -69,7 +69,7 @@ Result:
 ==================================
       Welcome in OPEN Store
 ==================================
-        Items count : 13
+        Items count: 13
 
          0  -  Exit
          1  -  List inventory
@@ -81,9 +81,9 @@ your choice> 1
 
 It still works !
 
-We will continue our refactoring by encapsulating the store logic inside a class of the store module
+We will continue our refactoring by encapsulating the store logic inside a class of the ``store`` module
 
-```python
+```Python
 from collections import namedtuple
 from typing import List
 
@@ -105,7 +105,7 @@ class Store:
             self.__inventory.append(Product(name, price, quantity))
 
         except ValueError:
-            raise ValueError(f'Invalid product input : {name}, {price}, {quantity}')
+            raise ValueError(f'Invalid product input: {name}, {price}, {quantity}')
 
         self.__items_count += quantity
 
@@ -114,7 +114,7 @@ class Store:
             self.__inventory.remove(product)
 
         except ValueError:
-            raise ValueError(f'Unknown product : {product!r}')
+            raise ValueError(f'Unknown product: {product!r}')
 
         self.__items_count -= product.quantity
 
@@ -130,11 +130,11 @@ class Store:
 Now the store can be created as an object.  Most importantly we encapsulated and protected the store data by hiding it and only allowing the management of the inventory through an API that validates the inputs (raising exception with comprehensive messages) and limits the actions
 By the way, we don't need the factory function ``create_store`` anymore
 
-Did you notice the use of [type hinting](https://docs.python.org/3/library/typing.html)... it is supported since version 3.5 of python and have been improved up on throught out minor releases (even 3.6 ones). It does not add any runtime behavior (mostly) and it is just a hint for type checkers and static code analysers (ex: IDE)... Not necessary but recommended for large project, we will continue using it in our lab
+Did you notice the use of [type hinting](https://docs.Python.org/3/library/typing.html)? It is supported since version 3.5 of Python and have been improved up on throughout minor releases (even 3.6 ones). It does not add any runtime behavior (mostly) and it is just a hint for type checkers and static code analysers (ex: IDE)... Not necessary but recommended for large project, we will continue using it in our lab
 
-Next, we have to adapt our REPL command handlers to use the new store representation. While doing this, we are going to refactor the REPL to use the builtin [``Cmd``](https://docs.python.org/3/library/cmd.html) library... We reinvented the wheel just to learn !
+Next, we have to adapt our REPL command handlers to use the new store representation. While doing this, we are going to refactor the REPL to use the builtin [``Cmd``](https://docs.Python.org/3/library/cmd.html) module... We reinvented the wheel just to learn!
 
-```python
+```Python
 from cmd import Cmd
 from tabulate import tabulate
 from storify.store import Store
@@ -172,7 +172,7 @@ class StoreREPL(Cmd):
             removed = self.__store.inventory[index]
 
             self.__store.remove_product(removed)
-            print("Product has been removed : {!r}".format(removed))
+            print("Product has been removed: {!r}".format(removed))
 
         except (IndexError, ValueError):
             print("Error: You must provide an existing product id")
@@ -187,7 +187,7 @@ class StoreREPL(Cmd):
             print("Error: You must provide an existing product id")
             return
 
-        print("Modify product : {!r}".format(modified))
+        print("Modify product: {!r}".format(modified))
 
         name = input(f"Name [{modified.name}]> ") or modified.name
         price = input(f"Price [{modified.price}]> ") or modified.price
@@ -211,11 +211,11 @@ class StoreREPL(Cmd):
         return True
 ```
 
-The modify product use case combines adding new product to the store and removing the old one. It is just a simplification due to the index of products not being important
+The _modify product_ use case combines adding new product to the store and removing the old one. It is just a simplification due to the index of products not being important (for now)
 
-The main function becomes :
+The ``main`` function becomes:
 
-```python
+```Python
 from storify.interfaces.repl import StoreREPL
 from storify.store import Product, Store
 
@@ -233,7 +233,7 @@ def main():
 Run the application now to see if it is working
 
 ```shell script
-python storify
+Python storify
 ```
 
 Result:
