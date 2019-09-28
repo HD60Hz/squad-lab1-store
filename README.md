@@ -64,7 +64,7 @@ The sequence for creating and opening a socket then responding goes as follows:
 When the server closes the connection, the TCP protocol dictates that the process must be kept in ``TIME_WAIT`` state waiting for any late messages from the client.
 The problem is we can not restart our store server while the timeout period is not finished (address taken). This is why we use the option ``SO_REUSEADDR`` to force the kernel to bind to the used address anyway
 
-In our main
+In our ``main`` function
 
 ```python
 ...
@@ -235,9 +235,10 @@ class StoreServer(Thread):
                     conn.sendall('Unknown command\n'.encode('utf-8'))
 ```
 
-Now when a customer choose a command, nothing happens in his side but the use case is started store side  
+Now when a customer chooses a command, nothing happens in his side but the use case is started store side  
 Let's continue with our monkey patching. Create a utility module
 
+Result (file system):
 <pre>
 storify
     ├── ...
