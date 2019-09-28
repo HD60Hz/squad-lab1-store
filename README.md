@@ -13,14 +13,14 @@ First we need to define some simple use case specifications that will bound our 
 	* I can modify a product from the inventory by id
 
 #### Model
-Now we need to model our store before we can interact with it. To do so, we are going to use three data structure : _Dictionary_, _List_ and _Tuple_.
+Now we need to model our store before we can interact with it. To do so, we are going to use three data structure: _Dictionary_, _List_ and _Tuple_.
 
-The store will be represented by a dictionary of 3 values :
-* name : a string value representing the name of the store
-* inventory : a list of products
-* items_count : an integer containing the total number of products in the store
+The store will be represented by a dictionary of 3 values:
+* name: a string value representing the name of the store
+* inventory: a list of products
+* items_count: an integer containing the total number of products in the store
 
-The products will be represented by a tuple of 3 values :
+The products will be represented by a tuple of 3 values:
 1. a string value representing the name
 2. a float value representing the price
 3. an integer value representing the quantity
@@ -33,7 +33,7 @@ store = {
 }
 ```
 
-It would be good to create our store using a factory function that will encapsulate our model. This function will receive 2 arguments : a name for the store, and an initial inventory (optional).
+It would be good to create our store using a factory function that will encapsulate our model. This function will receive 2 arguments: a name for the store, and an initial inventory (optional).
 
 ```python
 # product mapping
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     )
     print(store)
 ```
-To avoid pointing to product attributes by index in the tuple, we can replace it with a _namedtuple_. It is a subclass used to create tuple-like objects that have fields accessible by attribute lookup as well as being indexable and iterable.
+To avoid pointing to product attributes by index in the tuple, we can replace it with a [namedtuple](https://docs.python.org/3.7/library/collections.html#collections.namedtuple). It is a subclass used to create tuple-like objects that have fields accessible by attribute lookup as well as being indexable and iterable.
 
 ```python
 from collections import namedtuple
@@ -177,7 +177,7 @@ def run_store_shell(store):
     print("{:^34}".format(f"Welcome in {store['name']}"))
     while True:
         print("=" * 34)
-        print("{:^34}".format(f"Items count : {store['items_count']} \n"))
+        print("{:^34}".format(f"Items count: {store['items_count']} \n"))
         print_commands()
 
         try:
@@ -212,7 +212,7 @@ Result:
 =================================
       Welcome in OPEN Store
 ==================================
-        Items count : 13
+        Items count: 13
 
 	 1  -  List inventory
 	 2  -  Add product
@@ -243,7 +243,7 @@ if __name__ == '__main__':
 			])
     run_store_shell(store)
 ```
-When we choose the command 1 corresponding to inventory listing we get :
+When we choose the command 1 corresponding to inventory listing we get:
 
 Result:
 <pre>
@@ -254,7 +254,7 @@ Result:
 A better way to print a list in tabular form is to use some existing library like _tabulate_.  
 tabulate tries to detect column types automatically, and aligns the values properly
 
-We begin by installing it using :
+We begin by installing it using:
 ```shell
 pip install tabulate
 ```
@@ -289,7 +289,7 @@ def add_product(store):
     except ValueError:
         print("You must provide a valid product")
 ```
-When we choose the command 2 corresponding to adding new  product we get :
+When we choose the command 2 corresponding to adding new  product we get:
 
 Result:
 <pre>
@@ -319,19 +319,19 @@ def remove_product(store):
         removed = store["inventory"].pop(index)
         store['items_count'] -= removed.quantity
 
-        print("Product has been removed : {!r}".format(removed))
+        print("Product has been removed: {!r}".format(removed))
 
     except ValueError:
         print("You must provide a product id")
     except IndexError:
         print("You must choose an existing product")
 ```
-When we choose the command 3 corresponding to removing existing product we get :
+When we choose the command 3 corresponding to removing existing product we get:
 
 Result:
 <pre>
 Choose a product> 0
-Product has been removed : Product(name='screen', price=600.0, quantity=3)
+Product has been removed: Product(name='screen', price=600.0, quantity=3)
 </pre>
 
 Re-listing the inventory will prove that the chosen product is removed
@@ -352,7 +352,7 @@ def modify_product(store):
         index = int(input("Choose a product> "))
 
         modified = store['inventory'][index]
-        print("Modify product : {!r}".format(modified))
+        print("Modify product: {!r}".format(modified))
         name = input(f"Name [{modified.name}]> ") or modified.name
         price = float(input(f"Price [{modified.price}]> ") or modified.price)
         quantity = int(input(f"Quantity [{modified.quantity}]> ") or modified.quantity)
@@ -365,12 +365,12 @@ def modify_product(store):
     except IndexError:
         print("You must choose an existing product")
 ```
-When we choose the command 4 corresponding to modifying existing product we get :
+When we choose the command 4 corresponding to modifying existing product we get:
 
 Result:
 <pre>
 Choose a product> 0
-Modify product : Product(name='screen', price=600.0, quantity=3)
+Modify product: Product(name='screen', price=600.0, quantity=3)
 Name [screen]> Chocolat
 Price [600.0]>
 Quantity [3]>
@@ -415,11 +415,11 @@ def run_store_shell(store):
         ...
 ```
 
-When we choose the command 0 to exit we get :
+When we choose the command 0 to exit we get:
 
 Result:
 <pre>
-        Items count : 13
+        Items count: 13
 
 	 0  -  Exit
 	 1  -  List inventory
