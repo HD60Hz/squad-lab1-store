@@ -6,7 +6,7 @@ Until now, the manager had to start the storify application and keep it running 
 In this chapter, we will improve our system by adding a file based persistance for the inventory. The file types that will be used are **CSV** and **JSON**.
 Let's get started !
 
-### Inventory File DB
+#### Inventory File DB
 First of all we have to update our project structure by adding a ``db`` package
 
 Result:
@@ -46,7 +46,7 @@ We will come back to it later but let's assume the existence of ``DATA_DIR`` tha
 
 For sake of simplicity, we will restrict the api of the database to: ``save_products`` and ``load_products``
 
-#### Save products
+##### Save products
 Saving data to a CSV or a JSON file are technically different operations. Hence, it is a good practice to separate the implementation version then delegate accordingly based on the configuration    
 The configuration allows us also to resolve the path of the storage file: by concatenating the directory path, the file name defined as class attribute of ``InventoryFileDB`` and file extension (csv or json). The resolved path can be communicated as argument to subroutines:``save_csv_products``, ``save_json_products``
 
@@ -94,7 +94,7 @@ In our case we need to construct the path to the file that will contains our dat
 ...
 ```
 
-#### Load products
+##### Load products
 Similarly to saving products, loading product must verify the existence of either a CSV or JSON file based on configuration then load data from them   
 We need to separate the implementation versions (CSV, JSON) then invoke the appropriate one
 
@@ -130,7 +130,7 @@ We need to separate the implementation versions (CSV, JSON) then invoke the appr
 
 ``load_products`` returns a generator (kind of iterator) that will yield one product at a time and thus save some memory in CSV's case (JSON require loading all file content to have a valid and deserializable string)
 
-### Persistence of store inventory
+#### Persistence of store inventory
 Let's specify a simple workflow for the persistence and loading of the store inventory. We will assume that when a store is created, it will automatically load its inventory from the file database (No need for the initial/provided inventory). On the other hand we will assume, and this is for simplicity purposes, that exiting the REPL will trigger the persistance of all the inventory
 
 ```python
