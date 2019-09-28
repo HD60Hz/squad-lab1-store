@@ -15,7 +15,7 @@ As a customer,
 * I can checkout
 
 #### Refactoring
-Before we start implementing the customer REPL, we need refactor our store to introduce a _product identifier_ to identify product in cart even after inventory modification  
+Before we start implementing the customer REPL, we need refactor our store to introduce a **product identifier** to identify product in cart even after inventory modification  
 We will create a sequential id system where we keep track of the last id and increment it each time we add a product. In the processing of indexing the database products in our new map inventory (dict), we resolve the max product id as the last id to continue from  
 
 ```python
@@ -46,7 +46,7 @@ class Store:
             quantity = int(quantity)
 
         except ValueError:
-            raise ValueError(f'Invalid product input : {name}, {price}, {quantity}')
+            raise ValueError(f'Invalid product input: {name}, {price}, {quantity}')
 
         self.__last_id += 1
         new = Product(self.__last_id, name, price, quantity)
@@ -59,7 +59,7 @@ class Store:
             del self.__inventory[product.id]
 
         except KeyError:
-            raise ValueError(f'Unknown product : {product!r}')
+            raise ValueError(f'Unknown product: {product!r}')
 
         self.__items_count -= product.quantity
     ... 
@@ -68,20 +68,20 @@ class Store:
         return self.__inventory.copy()
 ```
 
-For the old use case of _modifiying products_, we need to create a special method to update a product while preserving its id
+For the old use case of **modifiying products**, we need to create a special method to update a product while preserving its id
 
 ```python
     ...
     def update_product(self, product: Product, name: str, price: float, quantity: int):
         if product.id not in self.__inventory:
-            raise ValueError(f'Unknown product : {product!r}')
+            raise ValueError(f'Unknown product: {product!r}')
 
         try:
             price = float(price)
             quantity = int(quantity)
 
         except ValueError:
-            raise ValueError(f'Invalid product input : {name}, {price}, {quantity}')
+            raise ValueError(f'Invalid product input: {name}, {price}, {quantity}')
 
         self.__inventory[product.id] = Product(product.id, name, price, quantity)
     ...
@@ -119,7 +119,7 @@ Because we save the id in the database (file), we need to recreate the product w
 ```
 
 ##### REPL
-Instead of identifing the product by index in list of inventory. We now have a dedicated id. Because we use a ``dict`` and keys are accessible like indexes, there is not alot of change
+Instead of identifing the product by index in list of inventory. We now have a dedicated id. Because we use a ``dict`` and keys are accessible like indexes, there is not a lot of change
 
 ```python
     ...
@@ -143,7 +143,7 @@ To modify a product, we invoke the ``update_product`` instead of  ``add_product`
             print('Error: You must provide an existing product id')
             return
 
-        print(f'Modify product : {modified!r}')
+        print(f'Modify product: {modified!r}')
         name = input(f'Name [{modified.name}]> ') or modified.name
         price = input(f'Price [{modified.price}]> ') or modified.price
         quantity = input(f'Quantity [{modified.quantity}]> ') or modified.quantity
@@ -158,10 +158,10 @@ To modify a product, we invoke the ``update_product`` instead of  ``add_product`
 
 That's about it! Now we can continue our implementation of customer use cases
 
-### EXERCICE :
+### EXERCICE:
 From the test describe below and its result, implement all the shopping use cases
 
-Test :
+Test:
 * List inventory
 * Pick a product with quantity
 * Pick a second product with quantity
@@ -173,8 +173,7 @@ Test :
 * Chechout to see the recap
 * List inventory from store to verify the new quantities of the picked products
 
-Result :
-
+Result:
 <pre>
 Welcome to OPEN store store. Type help or ? to list commands.
 
@@ -196,19 +195,19 @@ Customer>list_inventory
   12  Meuble TV Atelier II                 649.99          49
 Customer>pick_product
 Choose a product> 1
-Picking product : Product(id=1, name='Suspension Brooklyn I', price=219.99, quantity=28)
+Picking product: Product(id=1, name='Suspension Brooklyn I', price=219.99, quantity=28)
 How many? 3
 Customer>pick_product
 Choose a product> 2
-Picking product : Product(id=2, name='Table de jardin Iwate (extensible)', price=129.99, quantity=11)
+Picking product: Product(id=2, name='Table de jardin Iwate (extensible)', price=129.99, quantity=11)
 How many? 1
 Customer>pick_product
 Choose a product> 5
-Picking product : Product(id=5, name='Paravent Pirot', price=89.99, quantity=16)
+Picking product: Product(id=5, name='Paravent Pirot', price=89.99, quantity=16)
 How many? 2
 Customer>pick_product
 Choose a product> 1
-Picking product : Product(id=1, name='Suspension Brooklyn I', price=219.99, quantity=28)
+Picking product: Product(id=1, name='Suspension Brooklyn I', price=219.99, quantity=28)
 How many? 3
 Customer>list_cart
 1 Suspension Brooklyn I 219.99 x 6
@@ -266,7 +265,7 @@ class Cart:
         self.__products = defaultdict(lambda: 0)  # or defaultdict(int)
 ...
 ```
-The cart stores the picked product as : product id (key) to quantity (value). Using the ``defaultdict`` allows us to have a default quantity (zero) for a new picked product
+The cart stores the picked product as: product id (key) to quantity (value). Using the ``defaultdict`` allows us to have a default quantity (zero) for a new picked product
 
 ##### Pick/discard product
 A product picked twice have the old and new quantity cumulated
@@ -275,21 +274,21 @@ A product picked twice have the old and new quantity cumulated
     ...
     def pick_product(self, product, quantity):
         if product.id not in self.__inventory:
-            raise ValueError(f'Unknown product : {product!r}')
+            raise ValueError(f'Unknown product: {product!r}')
 
         try:
             quantity = self.__products[product.id] + int(quantity)
         except ValueError:
-            raise ValueError(f'Invalid quantity : {quantity}')
+            raise ValueError(f'Invalid quantity: {quantity}')
 
         if not (0 < quantity <= product.quantity):
-            raise ValueError(f'Invalid quantity : {quantity}')
+            raise ValueError(f'Invalid quantity: {quantity}')
 
         self.__products[product.id] = quantity
 
     def discard_product(self, product):
         if product.id not in self.__products:
-            raise ValueError(f'Unknown product : {product!r}')
+            raise ValueError(f'Unknown product: {product!r}')
 
         del self.__products[product.id]
 
@@ -341,7 +340,7 @@ class Store:
 All the cart actions are virtual and does not affect the inventory till checkout time. The checkout update inventory products quantities, flags the cart and returns a list of purchases with total
 
 #### Customer REPL
-This REPL is quite similare to the store one. It will create a cart from the provided store when instantiated then simply, for each use case, call the new API (above), catch its exceptions and present them accordingly 
+This REPL is quite similar to the store one. It will create a cart from the provided store when instantiated then simply, for each use case, call the new API (above), catch its exceptions and present them accordingly 
 
 ```python
 class CustomerREPL(Cmd):
@@ -371,7 +370,7 @@ class CustomerREPL(Cmd):
             print('Error: You must provide an existing product id')
             return
 
-        print(f'Picking product : {picked}')
+        print(f'Picking product: {picked}')
         quantity = input('How many? ')
 
         try:
