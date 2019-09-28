@@ -9,6 +9,7 @@ Let's get started !
 ### Inventory File DB
 First of all we have to update our project structure by adding a ``db`` package
 
+Result:
 <pre>
 storify
     ├── db
@@ -38,7 +39,7 @@ class InventoryFileDB:
         self.__dir_path = DATA_DIR
         self.__file_type = file_type
 ```
-Because we want to support multiple types of file. The ``Types`` [Enum](https://docs.python.org/3/library/enum.html) is a class definition that allows the listing, referencing and hinting (var types) of file types that will be used (for example in InventoryFileDB instanciation)
+Because we want to support multiple types of file. The ``Types`` [Enum](https://docs.python.org/3/library/enum.html) is a class definition that allows the listing, referencing and hinting (var types) of file types that will be used (for example in InventoryFileDB instantiation)
 
 To create the database, we need to provide some configuration like the above mentioned file type 
 We will come back to it later but let's assume the existence of ``DATA_DIR`` that contains the path to the application data directory
@@ -46,11 +47,11 @@ We will come back to it later but let's assume the existence of ``DATA_DIR`` tha
 For sake of simplicity, we will restrict the api of the database to : ``save_products`` and ``load_products``
 
 #### Save products
-Saving data to a CSV or a JSON file are technically different operations. Hence, it is a good practice to seperate the implementation version then delegate accordingly based on the configuration (chosen file type)
-The configuration allows us also to resolve the path of the storage file : by concatenating the directory path, the file name defined as class attribut of InventoryFileDB and file extension (csv or json). The resolved path can be communicated as argument to subroutines :``save_csv_products``, ``save_json_products``
+Saving data to a CSV or a JSON file are technically different operations. Hence, it is a good practice to separate the implementation version then delegate accordingly based on the configuration (chosen file type)
+The configuration allows us also to resolve the path of the storage file : by concatenating the directory path, the file name defined as class attribute of InventoryFileDB and file extension (csv or json). The resolved path can be communicated as argument to subroutines :``save_csv_products``, ``save_json_products``
 
-`The ``path`` of the ``os`` standard module can help us manage files and directories paths (verifition, access, composition...)  
-In our case we need to construct the path to the file that will contain our data from : directory path, file name and file extension 
+`The _path_ of the _os_ standard module can help us manage files and directories paths (verification, access, composition...)  
+In our case we need to construct the path to the file that will contains our data from : directory path, file name and file extension 
 
 ```python
     ...
@@ -66,9 +67,9 @@ In our case we need to construct the path to the file that will contain our data
     ...
 ```
 
-``json`` Python builtin library provide some simple functions to marshell (dump/dumps) and unmarshell (load/loads) Python objects into/from json formated strings
+**json** Python builtin library provide some simple functions to marshell (dump/dumps) and unmarshell (load/loads) Python objects into/from json formated strings
 
-``csv`` Python builtin library allows the creation of writers and readers from IO file objects (``open``). The writer can write headers and rows in the targeted CSV file. The reader is an iterable that can load the file rows
+**csv** Python builtin library allows the creation of writers and readers from IO file objects (**open**). The writer can write headers and rows in the targeted CSV file. The reader is an iterable that can load the file rows
 
 ```python
     ...
@@ -94,7 +95,7 @@ In our case we need to construct the path to the file that will contain our data
 ...
 ```
 #### Load products
-Similarly to saving products, loading product must verify the existance of either a CSV or JSON file based on configuration then load data from them, we need to seperate the implementation versions (CSV, JSON) then invoke the appropriate one
+Similarly to saving products, loading product must verify the existence of either a CSV or JSON file based on configuration then load data from them, we need to separate the implementation versions (CSV, JSON) then invoke the appropriate one
 
 ```python
     from typing import Iterable, Optional
@@ -128,8 +129,8 @@ Similarly to saving products, loading product must verify the existance of eithe
 
 ``load_products`` returns a generator (kind of iterator) that will yield one product at time and thus saving some memory in the case of CSV (JSON require loading all file content to have a valid and deserializable string)
 
-### Persistance of store inventory
-Let's specify a simple workflow for the persistance and loading of the store inventory. We will assume that when a store is created (storify is started) it will automatically load its inventory from the file database. No need for the initial/provided inventory. On the other hand we will assume, and this is for simplicity purposes, that exiting the REPL with trigger the persistance of all the inventory
+### Persistence of store inventory
+Let's specify a simple workflow for the persistence and loading of the store inventory. We will assume that when a store is created (storify is started) it will automatically load its inventory from the file database. No need for the initial/provided inventory. On the other hand we will assume, and this is for simplicity purposes, that exiting the REPL will trigger the persistance of all the inventory
 
 ```python
 class Store:
@@ -146,10 +147,10 @@ class Store:
             self.__inventory.append(product)
             self.__items_count += product.quantity
 ```
-In the init/construction method we instantiate an inventory file database by providing the absolute path of ``store`` module parent directory, aka ``storify`` and a hardcoded file type
-This database is then kept as a store attributes for future persistance
+In the init/construction method, we instantiate an inventory file database by providing the absolute path of ``store`` module parent directory, aka ``storify`` and a hardcoded file type
+This database is then kept as a store attributes for future persistence
 
-Maybe some of you have noticed the import inside ``__init__`` (yeah import can be everywhere). The reason behind that is to avoid a circular dependencies (store imports InventoryFileDB, and db/inventory import Product)
+Maybe some of you have noticed the import inside ``__init__`` (yeah import can be everywhere). The reason behind that is to avoid a _circular dependencies_ (store imports InventoryFileDB, and db/inventory import Product)
 Normally circular dependencies are sign of bad design. It means that there may be a better design where the depend and the dependency can joined in the same module. In our case, the solution above is good enough
 
 Because ``load_products`` return a generator we can simply iterate over the result to populate our inventory
@@ -172,8 +173,8 @@ def do_exit(self, args):
 ```
 
 Finally we need to quickly adapt the main function...BUT WAIT !
-Remember, we did not yet define the DATA_DIR. We want to create a _data_ directory in root of the project to contain all inputs/outputs of our application  
-Of cource this new directory should not be versioned. So add it to gitignore file
+Remember, we did not yet define the ``DATA_DIR`. We want to create a _data_ directory in root of the project to contain all inputs/outputs of our application  
+Of course this new directory should not be versioned. So add it to .gitignore file
 
 ```python
 from pathlib import Path
@@ -186,7 +187,7 @@ def main():
     store = Store(name="OPEN Store")
     StoreREPL(store).cmdloop()
 ```
-``pathlib`` is a much elegent library to manage path (than ``os.path``)
+``pathlib`` is a much "elegant" library to manage path (than ``os.path``)
 
 Let's test ALL of this now
 * Clear any inventory file (CSV, JSON)
@@ -224,6 +225,7 @@ Chocolate,40.0,10
 
 Restarting storify
 
+Result:
 <pre>
 Welcome to OPEN Store store. Type help or ? to list commands.
 
