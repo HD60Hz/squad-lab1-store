@@ -5,17 +5,18 @@ LAB1 SQUAD TRAINING - PYTHON
 Storify implementation of the last chapter was a great start into practicing Python programming. It is a small but close example to a real world app. However, even though a one file script is acceptable to target a single and low complexity problem, it is a bad practice for application developpement especially for apps relatively complex and with a futur need of evolution and scalability.
 
 So let's see how we can refactor our code to improve it
-* Seperate Interface and store
-* Encapsulate store logic in an object (OOP)
+* Separate Interface and store
+* Encapsulate store logic in an object (**OOP**)
 * Use a command builtin library instead of our REPL implementation
 * Use types annotations
 
 #### Seperation
-One way to think about the seperation is to suppose our store can be managed with multiple interfaces or can have no interface at all. They must be a loose coupling between the interfaces and the store.
-More importantly, they need to have a unidirectional relationship between them. A store doesn't need to know about the existance of an application interface. However the application interface should know about, and thus, carve itself based on its logic.
+One way to think about the separation is to suppose our store can be managed with multiple interfaces or can have no interface at all. They must be a loose coupling between the interfaces and the store.
+More importantly, they need to have a unidirectional relationship between them. A store doesn't need to know about the existence of an application interface. However the application interface should know about, hence, carve itself based on its logic.
 
-Let's start by seperating storify into multiple files :
+Let's start by separating storify into multiple files :
 
+Result(Structure of storify):
 <pre>
 .
 ├──...
@@ -58,10 +59,11 @@ if __name__ == '__main__':
 
 Let's test it. run the command :
 
-```shell
+```shell script
 python storify
 ```
 
+Result:
 <pre>
 
 ==================================
@@ -126,9 +128,9 @@ class Store:
 ```
 
 Now the store can be created as an object.  Most importantly we encapsulated and protected the store data by hiding it and only allowing the management of the inventory through an API that validates the inputs (raising exception with comprehensive messages) and limits the actions
-By the way, we dont need the factory function ``create_store`` anymore
+By the way, we don't need the factory function ``create_store`` anymore
 
-Did you notice the use of [type hinting](https://docs.python.org/3/library/typing.html)... it is supported since version 3.5 of python and have been improved up on throught out minor releases (even 3.6 ones). It does not add any runtime behavior (mostly) and it is just a hint for type checkers and static code analysers (ex: IDE)... Not necessary but recommanded for large project, we will continue using it in our lab
+Did you notice the use of [type hinting](https://docs.python.org/3/library/typing.html)... it is supported since version 3.5 of python and have been improved up on throught out minor releases (even 3.6 ones). It does not add any runtime behavior (mostly) and it is just a hint for type checkers and static code analysers (ex: IDE)... Not necessary but recommended for large project, we will continue using it in our lab
 
 Next, we have to adapt our REPL command handlers to use the new store representation. While doing this, we are going to refactor the REPL to use the builtin [``Cmd``](https://docs.python.org/3/library/cmd.html) library... We reinvented the wheel just to learn !
 
@@ -209,7 +211,7 @@ class StoreCLI(Cmd):
         return True
 ```
 
-The modify product use case combines adding new product to the store and removing the old one. It is just a simplification due to the index of products not beeing important
+The modify product use case combines adding new product to the store and removing the old one. It is just a simplification due to the index of products not being important
 
 The main function becomes :
 
@@ -230,11 +232,11 @@ def main():
 
 Run the application now to see if it is working
 
-```shell
+```shell script
 python storify
 ```
-Result:
 
+Result:
 <pre>
 Welcome to OPEN Store store. Type help or ? to list commands.
 
