@@ -15,8 +15,8 @@ As a customer,
 * I can checkout
 
 #### Refactoring
-Before we start implementing the customer REPL, we need refactor our store to introduce a **product identifier** to identify product in cart even after inventory modification  
-We will create a sequential id system where we keep track of the last id and increment it each time we add a product. In the processing of indexing the database products in our new map inventory (dict), we resolve the max product id as the last id to continue from  
+Before we start implementing the customer REPL, we need refactor our store to introduce a _product identifier_ to identify product in cart even after inventory modification  
+We will create a sequential id system where we keep track of the last id and increment it each time we add a product. While processing database products, we will resolve the max product id as the last id to continue from  
 
 ```python
 from typing import Dict
@@ -68,7 +68,7 @@ class Store:
         return self.__inventory.copy()
 ```
 
-For the old use case of **modifiying products**, we need to create a special method to update a product while preserving its id
+For the old use case of **modifiying products**, we need to create a special method to update a product because we want to preserve its id
 
 ```python
     ...
@@ -89,7 +89,7 @@ For the old use case of **modifiying products**, we need to create a special met
 Now we need to adapt all the code impacted by this change
 
 ##### Save inventory
-Saving products still needs an iterable to we provide a list (``values``) of products from our map inventory
+Saving products still needs an iterable. So we provide the ``values`` of our inventory map
 
 ```python
     ...
@@ -119,7 +119,7 @@ Because we save the id in the database (file), we need to recreate the product w
 ```
 
 ##### REPL
-Instead of identifing the product by index in list of inventory. We now have a dedicated id. Because we use a ``dict`` and keys are accessible like indexes, there is not a lot of change
+Instead of identifing the product by index in inventory. We now have a dedicated id. Because we use a ``dict`` and keys are accessible like indices, there is not a lot of change
 
 ```python
     ...
@@ -170,8 +170,8 @@ Test:
 * List cart
 * Discard the second picked product
 * List cart
-* Chechout to see the recap
-* List inventory from store to verify the new quantities of the picked products
+* Checkout to see the recap
+* List inventory to verify the new quantities of the picked products
 
 Result:
 <pre>
@@ -414,7 +414,7 @@ class CustomerREPL(Cmd):
 ```
 For the checkout, the return purchases and total is displayed as a recap for the customer
 
-We can nest ``Cmd`` objects by starting their loop from the parent command
+We can nest ``Cmd`` objects by starting their loop in the parent command handler
 
 ```python
 class StoreREPL(Cmd):
