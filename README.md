@@ -87,7 +87,7 @@ cowsay-2.0.3.dist-info
 
 The problem with the Python packages/modules resolution strategy is that all projects present in the machine will share the **same packages versions**
 
-### VENV
+#### VENV
 
 [VENV](https://docs.python.org/3/library/venv.html) is a python package that can be use to encapsulate each project in its bubble
 with its own _Python and PIP binaries_, hence its own site packages directories
