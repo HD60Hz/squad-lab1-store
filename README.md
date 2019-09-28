@@ -2,7 +2,7 @@ LAB1 SQUAD TRAINING - PYTHON
 ---
 
 ### Concurrency
-Until now all the execution parts of the application are sequential. When a codes take longer to execute, because of long processing or some IO related stuff, the rest of the app need to wait till the end even though it does not depend on it  
+Until now all the execution parts of the application are sequential. When a code take longer to execute, because of long processing or some IO related stuff, the rest of the app need to wait till the end even though it does not depend on it  
 To have a closer look at that, we will try to add a sleep in the ``retrieve_articles`` of the scraper for each article (ex: sleep for 4 seconds)
 
 ```python
@@ -32,7 +32,7 @@ import time
 If we remove the inventory database to trigger the scraping then run _storify_, we will notice a big freeze. It is because the REPL is not yet looping  
 The scraping starts when the store initializes. So everything is blocked till the retrieval of all Home24 articles is finished
 
-An analogy to this situation would be :  
+An analogy to this situation would be:  
 Imagine we have a store with an inventory room and a backdoor where our provider can park his truck
 * Actually, we work alone. So we need to unload the products and store them in the inventory room. Then, and only then we can open our store and start selling ... sucks doesnt it ?!  
 * Imagine we have a super slow computer to manage our store. So we start working on the computer and every time it freezes for a couple of minutes, we cease the occasion to go and unload a couple of products to the inventory then come back. **THAT IS MULTITASKING**
@@ -40,9 +40,9 @@ Imagine we have a store with an inventory room and a backdoor where our provider
 
 **Concurrency** is a broader term that englobes both multitasking and parallelism
 
-In Python to achieve multitasking, we can either use :
-* Thread for preemptive multitasking (Limited by the [GIL](https://wiki.python.org/moin/GlobalInterpreterLock) in the case of CPython)
-* Asynchronous IO (ex: using asyncio) for cooperative multitasking
+In Python to achieve multitasking, we can either use:
+* _Thread_ for preemptive multitasking (Limited by the [GIL](https://wiki.python.org/moin/GlobalInterpreterLock) in the case of CPython)
+* Asynchronous IO (ex: using _asyncio_) for cooperative multitasking
 
 On the other hand to achieve real parallelism, we have to use ``multiprocessing``  
 [Here](https://realpython.com/python-concurrency/) is a good introduction all those concepts
@@ -104,7 +104,7 @@ Most importantly, ``push_from_home24`` is decoupled from the rest of the initial
 All this will help us on the introduction of Thread next
 
 #### Thread
-The use of a [Thread](https://docs.python.org/3/library/threading.html) is straight forward : Instantiate one and start it with a target and its arguments. In our case it is ``push_to_home24``
+The use of a [Thread](https://docs.python.org/3/library/threading.html) is straight forward: Instantiate one and start it with a target and its arguments. In our case it is ``push_to_home24``
 
 ```python
 ...
@@ -138,6 +138,7 @@ Let's test it. Remove the inventory database and run storify
 YAY!! No freeze  
 Go ahead and run list_inventory multiple times
 
+Result:
 <pre>
 Welcome to OPEN Store store. Type help or ? to list commands.
 
@@ -174,7 +175,7 @@ Store>
 
 As you can see the inventory is filling up without blocking our management of the store throught the REPL
 
-Let's step up our game and scrap multiple pages of Home24. We will add _Garden_ and _Light_ categories pages  
+Let's step up our game and scrap multiple pages of Home24. We will add **Garden** and **Light** categories pages  
 First we will define a ``Home24Categories`` Enum with the targeted URLs
 
 ```python
@@ -207,9 +208,9 @@ Now we can call 1 thread for each categorie and start them
 
 Great, we are overlapping the task (multitasking) so that when one task is sleeping (4 sec) an other task is run
 
-Now imagine we have 1000 website to scrap. It would be somewhat costly and inefficient to create a Thread for each task. We have to create a ``Pool`` of threads
+Now imagine we have 1000 website to scrap. It would be somewhat costly and inefficient to create a Thread for each task. We have to create a **Pool** of threads
 
-``ThreadPoolExecutor`` is sweet wrapper to hide the complexity of managing multiple Thread. It is offered by the standard library ``concurrent.futures``
+_ThreadPoolExecutor_ is sweet wrapper to hide the complexity of managing multiple Thread. It is offered by the standard library _concurrent.futures_
 ```python
 from concurrent.futures.thread import ThreadPoolExecutor
 ...
@@ -240,7 +241,7 @@ Unlike processes that have their own memory space, Threads share their parent pr
 If some tasks involve manipulating/referencing the same data, you have to use some mechanism (Locks, conditions...) to make you code thread-safe
 
 In our case the ``items_count`` is incremented by the product quantity. So we can have a race condition if there is a preemptive interruption from the os  
-Let's use a _Lock_
+Let's use a ``Lock`
 
 ```python
 from threading import Lock
@@ -255,7 +256,7 @@ from threading import Lock
             store.save_inventory()
 
     if not db_data:
-        l = Lock()
+        l = Lock()`
         executor = ThreadPoolExecutor(max_workers=3)
         executor.map(partial(push_from_home24, self, l), Home24Categories)
 ...
@@ -263,7 +264,7 @@ from threading import Lock
 
 #### Process
 [Multiprocessing](https://docs.python.org/3/library/multiprocessing.html) in Python have the same API as threading (seen above). But because each process has its own memory space, it is more complex to manage shared data in our program. The solution must involve some kind of inter-process communication (IPC)  
-In our case, because of the shared _inventory_ and _items_count_, it would be difficult to find AS a simple and elegent solution AS using threads
+In our case, because of the shared ``inventory`` and ``items_count``, it would be difficult to find AS a simple and elegant solution AS using threads
 
 This is how it would look like if we want to force the use of a pool of processes and a manager
 
@@ -314,9 +315,9 @@ def main():
 Imagine we want to schedule some task to be executed periodically or at a certain time. For example, we need to schedule an event for saving the store inventory every 10 seconds  
 
 There are many libraries in Python to handle scheduling
-* ``sched`` is a simple standard library that offers basic scheduling functionality 
-* ``schedule`` is a third-party library alternative with a fluent API (DSL)
-* ``APScheduler`` is a powerful and complete third-party library with support for concurrency and job storages
+* **sched** is a simple standard library that offers basic scheduling functionality 
+* **schedule** is a third-party library alternative with a fluent API (DSL)
+* **APScheduler** is a powerful and complete third-party library with support for concurrency and job storages
 
 First, let's try writing our own implementation with a simple loop and a ``time.sleep``. To avoid blocking we will use a thread
 
@@ -364,7 +365,7 @@ YEP! it is executing the save every 10 seconds without blocking us
 
 Let's try _APScheduler_ this time. Begin by installing it
 
-```shell
+```shell script
 pip install apscheduler
 ```
 
@@ -384,7 +385,7 @@ As simple as that !
 
 We added APScheduler to our dependencies, don't forget to add it to ``requirements.txt``  
 
-```shell
+```shell script
 pip freeze > requirements.txt
 ```
 
