@@ -9,10 +9,11 @@ Because we do not want to go through the tedious task of rewriting a new custome
 #### Socket server
 Simply put, sockets are used to send messages between process across a network. This network can be local (ex: kernel) or connecting multiple hosts
 
-In Python, the standard library ``socket`` offers the necessary API to create programs connected by socket (All kind of sockets). For this lab we will use TCP sockets because there are the most suitable of our use case (Reliability)
+In Python, the standard library _socket_ offers the necessary API to create programs connected by socket (All kind of sockets). For this lab we will use TCP sockets because there are the most suitable of our use case (Reliability)
 
-Let's create our ``server`` module in the _interfaces_ package
+Let's create our ``server`` module in the ``interfaces`` package
 
+Result (file system):
 <pre>
 storify
     ├── ...
@@ -52,6 +53,7 @@ class StoreServer:
 
                 conn.sendall(f'You requested : {command.decode("utf-8").strip()}\n'.encode('utf-8'))
 ```
+
 The sequence for creating and opening a socket then responding goes as follows:
 * Create a TCP socket for the internet family address (IPv4)
 * Bind the socket to the network interface and port. in this case the loopback interface and the port 65432
@@ -81,7 +83,7 @@ Let's test it. As the customer we are going to use ``telnet``
 telnet 127.0.0.1 65432
 ```
 
-Result (Server):
+Result (server):
 <pre>
 Customer connected ('127.0.0.1', 33360)
 Welcome to OPEN store store. Type help or ? to list commands.
@@ -89,7 +91,7 @@ Welcome to OPEN store store. Type help or ? to list commands.
 Store>
 </pre>
 
-Result (Client):
+Result (client):
 <pre>
 Trying 127.0.0.1...
 Connected to 127.0.0.1.
@@ -135,7 +137,7 @@ class StoreServer(Thread):
                 conn.sendall(f'You requested : {command.decode("utf-8").strip()}\n'.encode('utf-8'))
 ```
 
-The thread can be started in the main function. We use the daemon mode to allow the program to exit without waiting for these thread (We dont care if they are kill suddenly)
+The thread can be started in the main function. We use the daemon mode to allow the program to exit without waiting for these thread (We don't care if they are kill suddenly)
 
 ```python
 ...
@@ -149,7 +151,7 @@ def main():
 ```
 
 Now we can serve the customer while, we manage the store  
-Still we have an other problem. If another customer connects to the server he wont be served. To add multiclient serving we add a layer of threads (one per customer)
+Still we have an other problem. If another customer connects to the server he won't be served. To add multi-client serving we add a layer of threads (one per customer)
 
 ```python
 class StoreServer(Thread):
@@ -185,10 +187,10 @@ class StoreServer(Thread):
 Its working flawlessly !
 
 #### Current customer REPL
-If we pay close attention to the current REPL. We will notice that every interaction is done through ``stdout`` and ``stdin`` respectively using ``print`` and ``input``  
+If we pay close attention to the current REPL. We will notice that every interaction is done through **stdout** and **stdin** respectively using **print** and **input**  
 Imagine if we can change the behavior of input/print so that they use sockets instead of the standard IO streams and fallback to defaults when managing the store  
 
-We know that a CustomerREPL object contains all the methods to handle customer use cases. But, because we dont know how ``cmdloop`` of Cmd module works, we have to create our own loop and start the handler manually. The monkey patching will do the rest for us  
+We know that a CustomerREPL object contains all the methods to handle customer use cases. But, because we don't know how _cmdloop_ of Cmd module works, we have to create our own loop and start the handler manually. The monkey patching will do the rest for us  
 Let's implement our commands loop first 
 
 ```python
@@ -246,7 +248,7 @@ storify
 So this is our strategy. We will create a local storage for each serving thread and at the beginning of the task we put the socket connection in it. 
 When executing, our patched input/print function will look inside the local storage of the currently running thread and see if a connection is there. If so, we will know we are in the serving thread and we can use the socket to send and receive data. Otherwise, it is the main thread (without socket connection) so we fall back to the originals  
 
-In the utility, we will use the ``builtin`` module to do the patching
+In the utility, we will use the _builtin_ module to do the patching
 
 ```python
 import builtins
